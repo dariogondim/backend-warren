@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 
 import express, { Request, Response, NextFunction } from 'express';
+import {
+  initializeTransactionalContext,
+  patchTypeORMRepositoryWithBaseRepository,
+} from 'typeorm-transactional-cls-hooked';
+
 import cors from 'cors';
 import 'express-async-errors';
 
@@ -10,6 +15,9 @@ import routes from './routes';
 
 import '@shared/infra/typeorm';
 import '@shared/container';
+
+initializeTransactionalContext(); // Initialize cls-hooked
+patchTypeORMRepositoryWithBaseRepository(); // patch Repository with BaseRepository.
 
 const app = express();
 
