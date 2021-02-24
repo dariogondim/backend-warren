@@ -15,11 +15,11 @@ export default class CreateClientHasUsers1614186515362
             default: 'uuid_generate_v4()',
           },
           {
-            name: 'clients_id',
+            name: 'client_id',
             type: 'uuid',
           },
           {
-            name: 'users_id',
+            name: 'user_id',
             type: 'uuid',
           },
           {
@@ -35,18 +35,18 @@ export default class CreateClientHasUsers1614186515362
         ],
         foreignKeys: [
           {
-            name: 'ClientsId',
-            referencedTableName: 'clients_has_users',
+            name: 'ClientId',
+            referencedTableName: 'clients',
             referencedColumnNames: ['id'],
-            columnNames: ['clients_id'],
+            columnNames: ['client_id'],
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
           {
-            name: 'UsersId',
-            referencedTableName: 'clients_has_users',
+            name: 'UserId',
+            referencedTableName: 'users',
             referencedColumnNames: ['id'],
-            columnNames: ['users_id'],
+            columnNames: ['user_id'],
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
