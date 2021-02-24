@@ -18,7 +18,7 @@ export default class CreateBankAccounts1614125492747
             name: 'cc',
             type: 'varchar',
           },
-          { name: 'profitabily_id', type: 'uuid' },
+          { name: 'profitability_id', type: 'uuid', isNullable: true },
           {
             name: 'type',
             type: 'enum',
