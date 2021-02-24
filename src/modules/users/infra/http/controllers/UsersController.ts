@@ -2,10 +2,14 @@ import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import CreateUserService from '@modules/users/services/CreateUserService';
+import CreateClientsHasUsersService from '@modules/users_has_clients/services/CreateClientsHasUsersService';
+import { Transaction } from 'typeorm';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 export default class SessionsController {
+  @Transactional()
   public async create(request: Request, response: Response): Promise<Response> {
-    const { name, email, password } = request.body;
+    const { name, email, password, client_id } = request.body;
 
     const createUser = container.resolve(CreateUserService);
 
@@ -23,6 +27,13 @@ export default class SessionsController {
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
+
+    const createClientHasUser = container.resolve(CreateClientsHasUsersService);
+
+    const userHasClient = await createClientHasUser.execute({
+      user_id: user.id,
+      client_id,
+    });
 
     return response.json(userWithoutPassword);
   }
