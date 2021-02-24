@@ -22,11 +22,6 @@ export default class CreateClients1614125068917 implements MigrationInterface {
             type: 'varchar',
           },
           {
-            name: 'profitability_id',
-            type: 'uuid',
-            isNullable: true,
-          },
-          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()',
@@ -35,16 +30,6 @@ export default class CreateClients1614125068917 implements MigrationInterface {
             name: 'updated_at',
             type: 'timestamp',
             default: 'now()',
-          },
-        ],
-        foreignKeys: [
-          {
-            name: 'ProfitabilyClientId',
-            referencedTableName: 'profitability',
-            referencedColumnNames: ['id'],
-            columnNames: ['profitability_id'],
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
           },
         ],
       }),
