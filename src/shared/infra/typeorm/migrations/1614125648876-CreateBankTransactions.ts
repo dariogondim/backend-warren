@@ -43,10 +43,6 @@ export default class CreateBankTransactions1614125648876
             type: 'timestamp',
           },
           {
-            name: 'bank_transaction_id',
-            type: 'uuid',
-          },
-          {
             name: 'bank_account_sender',
             type: 'uuid',
           },
