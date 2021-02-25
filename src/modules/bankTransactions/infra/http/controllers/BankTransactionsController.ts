@@ -18,6 +18,8 @@ export default class BankTransactionsController {
       bank_account_sender_id,
     } = request.body;
 
+    const { user_id } = request.body;
+
     const createBankTransaction = container.resolve(CreateDepositService);
 
     const bankTransaction = await createBankTransaction.execute({
@@ -26,6 +28,7 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      user_id,
     });
 
     return response.json(bankTransaction);
