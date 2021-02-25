@@ -1,3 +1,4 @@
+import { BANK_TRANSACTIONS2 } from '@modules/bankTransactions/infra/typeorm/constants/BankTransactions.constants';
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export default class CreateBankTransactions1614125648876
@@ -17,47 +18,42 @@ export default class CreateBankTransactions1614125648876
           {
             name: 'status',
             type: 'enum',
-            enum: ['approved', 'pendent', 'canceled', 'rejected'], // o status da transação
+            enum: BANK_TRANSACTIONS2.status, // o status da transação
           },
           {
             name: 'origin_transaction',
             type: 'enum',
-            enum: ['ted', 'doc', 'pix'], // a origem da transação
+            enum: BANK_TRANSACTIONS2.originTransaction, // a origem da transação
           },
           {
             name: 'channel',
             type: 'enum',
-            enum: [
-              'internet_banking',
-              'cash_machine',
-              'app_bank',
-              'agency_direct',
-            ], // a origem da transação
+            enum: BANK_TRANSACTIONS2.channel, // a origem da transação
           },
           {
-            name: 'channel_id', // um id que identifique cada caixa eletronico, agencia bancária, etc
+            name: 'channel_description', // aalgo que identifique cada caixa eletronico, agencia bancária, etc
             type: 'varchar',
           },
           {
-            name: 'compensationDate',
+            name: 'compensation_date',
             type: 'timestamp',
           },
           {
-            name: 'bank_account_sender',
+            name: 'bank_account_sender_id',
             type: 'uuid',
           },
           {
-            name: 'bank_account_recipient',
+            name: 'bank_account_recipient_id',
             type: 'uuid',
-            isNullable: true, // o destinatário pode ser de outro banco
+            isNullable: true, // o destinatário pode ser de outro banco ou o tipo não se aplica
           },
           {
-            name: 'bank_id',
+            name: 'bank_destiny_id',
             type: 'uuid',
             isNullable: true, // usado quando o destinatário é para outro banco
           },
           {
-            name: 'agency_id',
+            name: 'agency_destiny',
             type: 'varchar',
             isNullable: true, // usado quando o destinatário é para outro banco
           },
@@ -67,7 +63,7 @@ export default class CreateBankTransactions1614125648876
             isNullable: true, // usado quando o destinatário é para outro banco
           },
           {
-            name: 'account_id',
+            name: 'account_destiny',
             type: 'varchar',
             isNullable: true, // usado quando o destinatário é para outro banco
           },
@@ -78,7 +74,7 @@ export default class CreateBankTransactions1614125648876
           {
             name: 'type_transaction',
             type: 'enum',
-            enum: ['deposit', 'withdraw', 'payment', 'profitability'], // o tipo do valor da transação
+            enum: BANK_TRANSACTIONS2.typeTransaction, // o tipo do valor da transação
           },
           {
             name: 'profitability_id',
@@ -101,7 +97,7 @@ export default class CreateBankTransactions1614125648876
             name: 'BankAccountsSenderId',
             referencedTableName: 'bank_accounts',
             referencedColumnNames: ['id'],
-            columnNames: ['bank_account_sender'],
+            columnNames: ['bank_account_sender_id'],
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
@@ -109,7 +105,7 @@ export default class CreateBankTransactions1614125648876
             name: 'BankAccountsRecipientId',
             referencedTableName: 'bank_accounts',
             referencedColumnNames: ['id'],
-            columnNames: ['bank_account_recipient'],
+            columnNames: ['bank_account_recipient_id'],
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
@@ -121,12 +117,20 @@ export default class CreateBankTransactions1614125648876
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
+          {
+            name: 'BankDestinyId',
+            referencedTableName: 'banks',
+            referencedColumnNames: ['id'],
+            columnNames: ['bank_destiny_id'],
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+          },
         ],
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('bank_transactions');
+    await queryRunner.dropTable('BANK_TRANSACTIONS2');
   }
 }
