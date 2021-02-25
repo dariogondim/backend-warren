@@ -1,4 +1,3 @@
-import Agency from '@modules/agencies/infra/typeorm/entities/Agency';
 import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import Bank from '@modules/banks/infra/typeorm/entities/Bank';
 import Client from '@modules/clients/infra/typeorm/entities/Client';
@@ -19,54 +18,54 @@ class BankTransactions {
   id: string;
 
   @Column()
-  status: 'approved' | 'pendent' | 'canceled' | 'rejected';
+  status: string;
+
+  @Column({ name: 'origin_transaction' })
+  originTransaction: string;
 
   @Column()
-  origin_transaction: 'ted' | 'doc' | 'pix';
+  channel: string;
 
-  @Column()
-  channel: 'internet_banking' | 'cash_machine' | 'app_bank' | 'agency_direct';
+  @Column({ name: 'type_transaction' })
+  typeTransaction: string;
 
-  @Column()
-  typeTransaction: 'deposit' | 'withdraw' | 'payment' | 'profitability';
+  @Column({ name: 'channel_description' })
+  channelDescription: string;
 
-  @Column()
-  channel_id: string;
-
-  @Column()
+  @Column({ name: 'compensation_date' })
   compensationDate: Date;
 
-  @Column()
-  agency_id: string;
+  @Column({ name: 'agency_destiny' })
+  agencyDestiny: string;
 
-  @Column()
-  cpf_destiny: string;
+  @Column({ name: 'cpf_destiny' })
+  cpfDestiny: string;
 
-  @Column()
-  account_id: string;
+  @Column({ name: 'account_destiny' })
+  accountDestiny: string;
 
   @Column()
   value: number;
 
   @Column()
-  bank_id: string;
+  bank_destiny_id: string;
 
   @ManyToOne(() => Bank)
-  @JoinColumn({ name: 'bank_id' })
+  @JoinColumn({ name: 'bank_destiny_id' })
   bank: Bank;
 
   @Column()
-  bank_account_sender: string;
+  bank_account_sender_id: string;
 
   @ManyToOne(() => Client)
-  @JoinColumn({ name: 'bank_account_sender' })
+  @JoinColumn({ name: 'bank_account_sender_id' })
   bankAccountSender: BankAccount;
 
   @Column()
-  bank_account_recipient: string;
+  bank_account_recipient_id: string;
 
   @ManyToOne(() => Client)
-  @JoinColumn({ name: 'bank_account_recipient' })
+  @JoinColumn({ name: 'bank_account_recipient_id' })
   bankAccountRecipient: BankAccount;
 
   @Column()
