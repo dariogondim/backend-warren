@@ -1,9 +1,11 @@
+import ClientsHasUsers from '@modules/users_has_clients/infra/typeorm/entities/ClientsHasUsers';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('users')
@@ -28,6 +30,9 @@ class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => ClientsHasUsers, clientsHasUsers => clientsHasUsers.user)
+  clients_has_users: ClientsHasUsers[];
 }
 
 export default User;
