@@ -13,6 +13,8 @@ import IClientsHasUsersRepository from '@modules/users_has_clients/repositories/
 import ClientsHasUsersRepository from '@modules/users_has_clients/infra/typeorm/repositories/ClientsHasUsersRepository';
 import IBankTransactionsRepository from '@modules/bankTransactions/repositories/IBankTransactionsRepository';
 import BankTransactionsRepository from '@modules/bankTransactions/infra/typeorm/repositories/BankTransactionsRepository';
+import BankAccountRepository from '@modules/bankAccounts/infra/typeorm/repositories/BankAccountRepository';
+import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
 
 container.registerSingleton<IUsersRepository>(
   'UsersRepository',
@@ -32,4 +34,9 @@ container.registerSingleton<IClientsHasUsersRepository>(
 container.registerSingleton<IBankTransactionsRepository>(
   'BankTransactionsRepository',
   BankTransactionsRepository,
+);
+
+container.registerSingleton<IBankAccountRepository>(
+  'BankAccountRepository',
+  BankAccountRepository,
 );
