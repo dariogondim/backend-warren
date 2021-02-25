@@ -1,20 +1,94 @@
 import { injectable, inject } from 'tsyringe';
 
-// import addDays from 'date-fns/addDays';
+import AppError from '@shared/errors/AppError';
+import moment from 'moment';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
+import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import IBankTransactionsRepository from '../repositories/IBankTransactionsRepository';
 import BankTransactions from '../infra/typeorm/entities/BankTransactions';
-import { BANK_TRANSACTIONS } from '../infra/typeorm/constants/BankTransactions.constants';
+import {
+  BANK_TRANSACTIONS,
+  BANK_TRANSACTIONS2,
+} from '../infra/typeorm/constants/BankTransactions.constants';
+
+function validateOriginTransaction(originTransaction: string) {
+  return BANK_TRANSACTIONS2.originTransaction.includes(originTransaction);
+}
+
+function validateChannelTransaction(channelTransaction: string) {
+  return BANK_TRANSACTIONS2.channel.includes(channelTransaction);
+}
+
+function hasBankAccountSenderId(bank_account_sender_id: string) {
+  return bank_account_sender_id;
+}
+
+function bankAccountExists(bankAccount: BankAccount | undefined) {
+  return bankAccount;
+}
+
+async function checkTokenClientHasAssociatedBankAccountId(
+  user_id: string,
+  userRepository: IUsersRepository,
+  client_id: string | undefined,
+) {
+  const user = await userRepository.findById(user_id);
+  console.log(client_id, user?.clients_has_users[0].client_id);
+  return (
+    user &&
+    user.clients_has_users.length > 0 &&
+    client_id &&
+    user.clients_has_users[0].client_id === client_id
+  );
+}
+
+async function getBankAccountObject(
+  bank_account_sender_id: string,
+  bankAccountRepository: IBankAccountRepository,
+): Promise<BankAccount | undefined> {
+  const bankAccount = await bankAccountRepository.findById(
+    bank_account_sender_id,
+  );
+  return bankAccount;
+}
+
+function getCompensationDate(originTransaction: string): Date {
+  if (originTransaction === BANK_TRANSACTIONS.originTransaction.Doc) {
+    return moment().add(1, 'day').toDate(); // compensa no dia seguinte
+  }
+  if (originTransaction === BANK_TRANSACTIONS.originTransaction.Ted) {
+    const todayAtFiveHours = moment().set({
+      hour: 17,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    });
+    if (moment().isAfter(todayAtFiveHours, 'minute')) {
+      return moment().add(1, 'day').toDate(); // compensa no dia seguinte
+    }
+  }
+  return moment().toDate(); // compensa tão cedo quanto possível
+}
+
+async function getSenderId(
+  usersRepository: IUsersRepository,
+  user_id: string,
+): Promise<string | undefined> {
+  const user = await usersRepository.findById(user_id);
+  if (user && user.clients_has_users.length > 0) {
+    return user.clients_has_users[0].client_id;
+  }
+  return undefined;
+}
 
 interface IRequest {
   originTransaction: string;
   channel: string;
   channelDescription: string;
   value: number;
-  bank_account_sender_id: string; // de onde parte o depósito
-  // typeTransaction: string;
-  // status: string; // gerado no service
-  // compensationDate: Date; // gerado no service
-  // profitability_id?: string; // pode ser nulo se nao tiver rentabilidade
+  bank_account_sender_id: string; // o id da conta onde se está fazendo o depósito
+  user_id: string; // o id do usuário que se autenticou
 }
 
 @injectable()
@@ -22,6 +96,12 @@ class CreateDepositService {
   constructor(
     @inject('BankTransactionsRepository')
     private bankTransactionsRepository: IBankTransactionsRepository,
+
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository,
+
+    @inject('BankAccountRepository')
+    private bankAccountRepository: IBankAccountRepository,
   ) {}
 
   public async execute({
@@ -30,11 +110,50 @@ class CreateDepositService {
     channelDescription,
     value,
     bank_account_sender_id,
+    user_id,
   }: IRequest): Promise<BankTransactions> {
+    // bussiness roles
+
+    if (!validateOriginTransaction(originTransaction)) {
+      throw new AppError('Origin transaction does not have a valid value');
+    }
+    if (!validateChannelTransaction(channel)) {
+      throw new AppError('Channel transaction does not have a valid value');
+    }
+
+    if (!hasBankAccountSenderId(bank_account_sender_id)) {
+      throw new AppError('The bank account needs to be selected');
+    }
+
     const status = BANK_TRANSACTIONS.status.Approved;
     const typeTransaction = BANK_TRANSACTIONS.typeTransaction.Deposit;
-    const compensationDate = new Date();
-    const profitability_id = 'eb85f0f2-2526-4935-b005-78d048c599f7';
+
+    const compensationDate = getCompensationDate(originTransaction);
+
+    const bankAccount = await getBankAccountObject(
+      bank_account_sender_id,
+      this.bankAccountRepository,
+    );
+
+    if (!bankAccountExists(bankAccount)) {
+      throw new AppError('The bank account not found', 404);
+    }
+
+    if (
+      !(await checkTokenClientHasAssociatedBankAccountId(
+        user_id,
+        this.usersRepository,
+        bankAccount?.client_id,
+      ))
+    ) {
+      throw new AppError(
+        'You do not have permission to access this account',
+        401,
+      );
+    }
+
+    const profitability_id = bankAccount?.profitability_id;
+
     const bankTransactionDeposit = this.bankTransactionsRepository.createDeposit(
       {
         originTransaction,
@@ -48,6 +167,7 @@ class CreateDepositService {
         profitability_id,
       },
     );
+
     return bankTransactionDeposit;
   }
 }
