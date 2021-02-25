@@ -11,6 +11,8 @@ import UserTokensRepository from '@modules/users/infra/typeorm/repositories/User
 
 import IClientsHasUsersRepository from '@modules/users_has_clients/repositories/IClientsHasUsersRepository';
 import ClientsHasUsersRepository from '@modules/users_has_clients/infra/typeorm/repositories/ClientsHasUsersRepository';
+import IBankTransactionsRepository from '@modules/bankTransactions/repositories/IBankTransactionsRepository';
+import BankTransactionsRepository from '@modules/bankTransactions/infra/typeorm/repositories/BankTransactionsRepository';
 
 container.registerSingleton<IUsersRepository>(
   'UsersRepository',
@@ -25,4 +27,9 @@ container.registerSingleton<IUserTokensRepository>(
 container.registerSingleton<IClientsHasUsersRepository>(
   'ClientsHasUsersRepository',
   ClientsHasUsersRepository,
+);
+
+container.registerSingleton<IBankTransactionsRepository>(
+  'BankTransactionsRepository',
+  BankTransactionsRepository,
 );
