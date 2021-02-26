@@ -18,6 +18,11 @@ bankTransactionsRouter.post(
 );
 
 bankTransactionsRouter.post(
+  '/payment',
+  bankTransactionController.createPayment,
+);
+
+bankTransactionsRouter.post(
   '/balance',
   bankTransactionController.calculateBalanceService,
 );
