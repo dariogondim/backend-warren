@@ -57,14 +57,14 @@ class BankTransactions {
   @Column()
   bank_account_sender_id: string;
 
-  @ManyToOne(() => Client)
+  @ManyToOne(() => BankAccount)
   @JoinColumn({ name: 'bank_account_sender_id' })
   bankAccountSender: BankAccount;
 
   @Column()
   bank_account_recipient_id: string;
 
-  @ManyToOne(() => Client)
+  @ManyToOne(() => BankAccount)
   @JoinColumn({ name: 'bank_account_recipient_id' })
   bankAccountRecipient: BankAccount;
 
