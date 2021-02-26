@@ -28,13 +28,16 @@ function bankAccountExists(bankAccount: BankAccount | undefined) {
   return bankAccount;
 }
 
+function validateValue(value: number) {
+  return value > 0;
+}
+
 async function checkTokenClientHasAssociatedBankAccountId(
   user_id: string,
   userRepository: IUsersRepository,
   client_id: string | undefined,
 ) {
   const user = await userRepository.findById(user_id);
-  console.log(client_id, user?.clients_has_users[0].client_id);
   return (
     user &&
     user.clients_has_users.length > 0 &&
@@ -69,17 +72,6 @@ function getCompensationDate(originTransaction: string): Date {
     }
   }
   return moment().toDate(); // compensa tão cedo quanto possível
-}
-
-async function getSenderId(
-  usersRepository: IUsersRepository,
-  user_id: string,
-): Promise<string | undefined> {
-  const user = await usersRepository.findById(user_id);
-  if (user && user.clients_has_users.length > 0) {
-    return user.clients_has_users[0].client_id;
-  }
-  return undefined;
 }
 
 interface IRequest {
@@ -125,6 +117,10 @@ class CreateDepositService {
       throw new AppError('The bank account needs to be selected');
     }
 
+    if (!validateValue(value)) {
+      throw new AppError('The value transaction is a invalid value');
+    }
+
     const status = BANK_TRANSACTIONS.status.Approved;
     const typeTransaction = BANK_TRANSACTIONS.typeTransaction.Deposit;
 
@@ -154,19 +150,17 @@ class CreateDepositService {
 
     const profitability_id = bankAccount?.profitability_id;
 
-    const bankTransactionDeposit = this.bankTransactionsRepository.createDeposit(
-      {
-        originTransaction,
-        channel,
-        channelDescription,
-        value,
-        bank_account_sender_id,
-        status,
-        typeTransaction,
-        compensationDate,
-        profitability_id,
-      },
-    );
+    const bankTransactionDeposit = this.bankTransactionsRepository.create({
+      originTransaction,
+      channel,
+      channelDescription,
+      value,
+      bank_account_sender_id,
+      status,
+      typeTransaction,
+      compensationDate,
+      profitability_id,
+    });
 
     return bankTransactionDeposit;
   }
