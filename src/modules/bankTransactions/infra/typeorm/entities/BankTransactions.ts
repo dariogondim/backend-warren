@@ -48,6 +48,9 @@ class BankTransactions {
   value: number;
 
   @Column()
+  memo: string;
+
+  @Column()
   bank_destiny_id: string;
 
   @ManyToOne(() => Bank)

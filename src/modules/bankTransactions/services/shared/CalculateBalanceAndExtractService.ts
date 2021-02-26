@@ -56,6 +56,7 @@ function getProfitabilityObjs(
         newBalance: 0,
         dtRef: moment(bt.created_at).toDate(),
         typeTransaction: bt.typeTransaction,
+        memo: '-',
       };
 
       const balanceBefore = balancePrev; // salva o saldo anterior antes da taxa
@@ -64,6 +65,7 @@ function getProfitabilityObjs(
       obj.newBalance = balancePrev; // o objeto registra o novo saldo, decorrente da aplicação da taxa
       obj.amount = balanceGain; // o saldo do objeto é o valor ganho com a taxa
       obj.typeTransaction = BANK_TRANSACTIONS.typeTransaction.Profitability; // o tipo da transação é profitability
+      obj.memo = 'your $money$ monetizing...!';
       objs.push(obj);
 
       dtTransaction.add(1440, 'minute'); // adiciona um dia em minutos
@@ -96,6 +98,7 @@ class CalculateBalanceAndExtractService {
         dtRef: new Date(),
         newBalance: 0,
         typeTransaction: '-',
+        memo: '-',
       },
     ];
     let balancePrev = 0;
@@ -108,6 +111,7 @@ class CalculateBalanceAndExtractService {
         newBalance: balancePrev + amount,
         dtRef: moment(bt.created_at).toDate(),
         typeTransaction: bt.typeTransaction,
+        memo: bt.memo,
       };
 
       balancePrev += obj.amount; // acumula o valor anterior

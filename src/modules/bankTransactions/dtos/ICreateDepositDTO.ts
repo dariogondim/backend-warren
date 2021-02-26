@@ -7,5 +7,6 @@ export default interface ICreateDepositDTO {
   bank_account_sender_id: string; // de onde parte o depósito
   status: string; // gerado no service
   compensationDate: Date; // gerado no service
+  memo: string;
   profitability_id?: string; // pode ser nulo se nao tiver rentabilidade
 }

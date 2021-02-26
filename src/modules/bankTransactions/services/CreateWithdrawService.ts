@@ -83,6 +83,7 @@ interface IRequest {
   channelDescription: string;
   value: number;
   bank_account_sender_id: string; // de onde parte o saque
+  memo: string;
   user_id: string; // o id do usuário que se autenticou
 }
 
@@ -104,6 +105,7 @@ class CreateWithdrawService {
     channelDescription,
     value,
     bank_account_sender_id,
+    memo,
     user_id,
   }: IRequest): Promise<BankTransactions> {
     // bussiness roles
@@ -164,6 +166,7 @@ class CreateWithdrawService {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
       status,
       typeTransaction,
       compensationDate,

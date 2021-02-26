@@ -4,4 +4,5 @@ export default interface IRetrieveBankStatementItemDTO {
   newBalance: number;
   dtRef: Date;
   typeTransaction: string;
+  memo: string;
 }

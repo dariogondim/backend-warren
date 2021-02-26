@@ -18,6 +18,7 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
     } = request.body;
 
     const { user_id } = request.body;
@@ -30,6 +31,7 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
       user_id,
     });
 
@@ -45,6 +47,7 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
     } = request.body;
 
     const { user_id } = request.body;
@@ -56,6 +59,7 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
       user_id,
     });
 
