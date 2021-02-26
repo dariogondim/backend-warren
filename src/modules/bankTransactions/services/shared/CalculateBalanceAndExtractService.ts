@@ -33,18 +33,18 @@ function getProfitabilityObjs(
   let dtNextTransaction;
 
   if (btNext) {
-    dtNextTransaction = moment(btNext.created_at);
+    dtNextTransaction = moment(btNext.compensationDate);
   } else {
     dtNextTransaction = moment(new Date());
   }
 
-  const dtTransaction = moment(bt.created_at);
+  const dtTransaction = moment(bt.compensationDate);
 
   const compensateProfitabilityDaily =
     bt.profitability &&
     bt.typeTransaction === BANK_TRANSACTIONS.typeTransaction.Deposit &&
     bt.profitability.type_profitability === 'daily' &&
-    moment(bt.created_at).isSameOrBefore(new Date());
+    moment(bt.compensationDate).isSameOrBefore(new Date());
 
   if (compensateProfitabilityDaily) {
     // a cada dia que o saldo anterior permanece na conta...
@@ -54,7 +54,7 @@ function getProfitabilityObjs(
         amount: bt.value,
         balancePrev,
         newBalance: 0,
-        dtRef: moment(bt.created_at).toDate(),
+        dtRef: moment(bt.compensationDate).toDate(),
         typeTransaction: bt.typeTransaction,
         memo: '-',
       };
@@ -71,7 +71,7 @@ function getProfitabilityObjs(
       dtTransaction.add(1440, 'minute'); // adiciona um dia em minutos
       // console.log(
       //   dtNextTransaction.diff(dtTransaction, 'minute'),
-      //   moment(bt.created_at),
+      //   moment(bt.compensationDate),
       //   dtTransaction,
       //   dtNextTransaction,
       //   balanceGain,
@@ -109,7 +109,7 @@ class CalculateBalanceAndExtractService {
         amount,
         balancePrev,
         newBalance: balancePrev + amount,
-        dtRef: moment(bt.created_at).toDate(),
+        dtRef: moment(bt.compensationDate).toDate(),
         typeTransaction: bt.typeTransaction,
         memo: bt.memo,
       };

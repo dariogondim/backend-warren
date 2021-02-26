@@ -2,6 +2,9 @@ import { getRepository, MoreThanOrEqual, Repository } from 'typeorm';
 
 import IBankTransactionsRepository from '@modules/bankTransactions/repositories/IBankTransactionsRepository';
 import ICreateDepositDTO from '@modules/bankTransactions/dtos/ICreateDepositDTO';
+import ICreateWithdrawDTO from '@modules/bankTransactions/dtos/ICreateWithdrawDTO';
+import ICreatePaymentDTO from '@modules/bankTransactions/dtos/ICreatePaymentDTO';
+import ICreatePaymentOutsideDTO from '@modules/bankTransactions/dtos/ICreatePaymentOutsideDTO';
 import BankTransactions from '../entities/BankTransactions';
 
 class BankTransactionsRepository implements IBankTransactionsRepository {
@@ -30,7 +33,13 @@ class BankTransactionsRepository implements IBankTransactionsRepository {
     return banksTransactions;
   }
 
-  public async create(data: ICreateDepositDTO): Promise<BankTransactions> {
+  public async create(
+    data:
+      | ICreateDepositDTO
+      | ICreateWithdrawDTO
+      | ICreatePaymentDTO
+      | ICreatePaymentOutsideDTO,
+  ): Promise<BankTransactions> {
     const banksTransactions = this.ormRepository.create(data);
 
     await this.ormRepository.save(banksTransactions);
