@@ -12,4 +12,14 @@ bankTransactionsRouter.post(
   bankTransactionController.createDeposit,
 );
 
+bankTransactionsRouter.post(
+  '/withdraw',
+  bankTransactionController.createWithdraw,
+);
+
+bankTransactionsRouter.post(
+  '/balance',
+  bankTransactionController.calculateBalanceService,
+);
+
 export default bankTransactionsRouter;
