@@ -5,6 +5,7 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 import CreateDepositService from '@modules/bankTransactions/services/CreateDepositService';
 import CreateWithdrawService from '@modules/bankTransactions/services/CreateWithdrawService';
 import RetrieveBalanceService from '@modules/bankTransactions/services/RetrieveBalanceService';
+import CreatePaymentService from '@modules/bankTransactions/services/CreatePaymentService';
 
 export default class BankTransactionsController {
   @Transactional()
@@ -31,6 +32,38 @@ export default class BankTransactionsController {
       channelDescription,
       value,
       bank_account_sender_id,
+      memo,
+      user_id,
+    });
+
+    return response.json(bankTransaction);
+  }
+
+  public async createPayment(
+    request: Request,
+    response: Response,
+  ): Promise<Response> {
+    const {
+      originTransaction,
+      channel,
+      channelDescription,
+      value,
+      bank_account_sender_id,
+      bank_account_recipient_id,
+      memo,
+    } = request.body;
+
+    const { user_id } = request.body;
+
+    const createBankTransaction = container.resolve(CreatePaymentService);
+
+    const bankTransaction = await createBankTransaction.execute({
+      originTransaction,
+      channel,
+      channelDescription,
+      value,
+      bank_account_sender_id,
+      bank_account_recipient_id,
       memo,
       user_id,
     });
