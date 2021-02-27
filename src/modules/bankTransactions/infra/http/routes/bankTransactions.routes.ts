@@ -23,6 +23,11 @@ bankTransactionsRouter.post(
 );
 
 bankTransactionsRouter.post(
+  '/payment/external',
+  bankTransactionController.createPaymentOutside,
+);
+
+bankTransactionsRouter.post(
   '/balance',
   bankTransactionController.calculateBalanceService,
 );

@@ -15,6 +15,8 @@ import IBankTransactionsRepository from '@modules/bankTransactions/repositories/
 import BankTransactionsRepository from '@modules/bankTransactions/infra/typeorm/repositories/BankTransactionsRepository';
 import BankAccountRepository from '@modules/bankAccounts/infra/typeorm/repositories/BankAccountRepository';
 import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
+import IBankRepository from '@modules/banks/repositories/IBankRepository';
+import BankRepository from '@modules/banks/infra/typeorm/repositories/BankRepository';
 
 container.registerSingleton<IUsersRepository>(
   'UsersRepository',
@@ -40,3 +42,5 @@ container.registerSingleton<IBankAccountRepository>(
   'BankAccountRepository',
   BankAccountRepository,
 );
+
+container.registerSingleton<IBankRepository>('BankRepository', BankRepository);
