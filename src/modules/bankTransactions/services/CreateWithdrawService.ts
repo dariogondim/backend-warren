@@ -58,7 +58,7 @@ async function checkHasBalanceSuficient(
   bankAccount: BankAccount,
   bankTransactionsRepository: IBankTransactionsRepository,
 ) {
-  const banksTransactions = await bankTransactionsRepository.findAllByBankAccount(
+  const banksTransactions = await bankTransactionsRepository.getTransactionsForBalanceByBankAccount(
     bankAccount.id,
   );
 
@@ -74,6 +74,7 @@ async function checkHasBalanceSuficient(
   const balanceCurrent = result.balance;
 
   const overdraft = 0; // chque especial
+  console.log(JSON.stringify(result));
 
   return balanceCurrent + overdraft >= withdrawValue;
 }
@@ -160,6 +161,8 @@ class CreateWithdrawService {
       throw new AppError('Insufficient funds');
     }
 
+    const profitability_id = bankAccount?.profitability_id;
+
     const bankTransactionDeposit = this.bankTransactionsRepository.create({
       originTransaction,
       channel,
@@ -170,6 +173,7 @@ class CreateWithdrawService {
       status,
       typeTransaction,
       compensationDate,
+      profitability_id,
     });
 
     return bankTransactionDeposit;

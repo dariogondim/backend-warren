@@ -76,7 +76,7 @@ async function checkHasBalanceSuficient(
   bankAccount: BankAccount,
   bankTransactionsRepository: IBankTransactionsRepository,
 ) {
-  const banksTransactions = await bankTransactionsRepository.findAllByBankAccount(
+  const banksTransactions = await bankTransactionsRepository.getTransactionsForBalanceByBankAccount(
     bankAccount.id,
   );
 
@@ -185,6 +185,8 @@ class CreatePaymentService {
       throw new AppError('Insufficient funds');
     }
 
+    const profitability_id = bankAccount?.profitability_id;
+
     const bankTransactionPaymentOrTransferInternal = this.bankTransactionsRepository.create(
       {
         originTransaction,
@@ -197,6 +199,7 @@ class CreatePaymentService {
         status,
         typeTransaction,
         compensationDate,
+        profitability_id,
       },
     );
 

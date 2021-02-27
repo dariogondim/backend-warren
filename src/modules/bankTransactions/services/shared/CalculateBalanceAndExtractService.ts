@@ -22,65 +22,84 @@ function getValueAmount(typeTransaction: string, value: number): number {
   return -value;
 }
 
-function getProfitabilityObjs(
-  balance: number,
-  bt: BankTransactions,
-  btNext?: BankTransactions,
-): IRetrieveBankStatementItemDTO[] {
-  const objs: IRetrieveBankStatementItemDTO[] = [];
-
-  let balancePrev = balance;
-  let dtNextTransaction;
-
-  if (btNext) {
-    dtNextTransaction = moment(btNext.compensationDate);
-  } else {
-    dtNextTransaction = moment(new Date());
+function getTaxProfitability(
+  transactionsInSameDtRef: BankTransactions[],
+  taxProfitabilityBefore: number,
+): number {
+  // determina a taxa pela primeira que a taxa for aplicada ao dia ou segue com a taxa anterior se não tem novos objetos
+  if (transactionsInSameDtRef.length > 0) {
+    let profitabilityToday = 0;
+    // se alguma taxa for aplicada no dia, recupera a primeira delas. se nenhuma taxa foi aplicada no dia, retorna 0
+    transactionsInSameDtRef.forEach(transaction => {
+      if (transaction.profitability) {
+        if (profitabilityToday === 0) {
+          profitabilityToday = transaction.profitability.tax;
+        }
+      }
+    });
+    return profitabilityToday;
   }
+  return taxProfitabilityBefore;
+}
 
-  const dtTransaction = moment(bt.compensationDate);
+function checkCompensateDateMonetizing(
+  dtMonetizing: Date,
+  periodMonetizing = 1,
+  limitDaysMonetizingBefore = 1,
+) {
+  const dtMonetizingM = moment(dtMonetizing)
+    .add(periodMonetizing, 'day')
+    .startOf('day');
+  // ex. se hoje é 26, monetiza todos os saldos até o final do dia 24
+  const limit = moment()
+    .subtract(limitDaysMonetizingBefore, 'day')
+    .endOf('day');
+  return dtMonetizingM.isSameOrBefore(limit);
+}
 
-  const compensateProfitabilityDaily =
-    bt.profitability &&
-    bt.typeTransaction === BANK_TRANSACTIONS.typeTransaction.Deposit &&
-    bt.profitability.type_profitability === 'daily' &&
-    moment(bt.compensationDate).isSameOrBefore(new Date());
+// só compensa imediatamente, pagamentos, para efeitos de saldo, embora só vão entrar no futuro, porque podem ser cancelados
+function checkCompensateTypeTransactionForSecurityBalance(
+  transaction: BankTransactions,
+  bankAccount: BankAccount,
+): boolean {
+  const alreadyCompensated = moment(
+    transaction.compensationDate,
+  ).isSameOrBefore(moment());
 
-  if (compensateProfitabilityDaily) {
-    // a cada dia que o saldo anterior permanece na conta...
+  const isReceipt =
+    transaction.bankAccountRecipient?.id === bankAccount.id ||
+    transaction.typeTransaction === BANK_TRANSACTIONS.typeTransaction.Deposit;
+  // se foi saque ou um pagamento, compense imediatamente
 
-    while (dtNextTransaction.diff(dtTransaction, 'minute') >= 1440) {
-      const obj: IRetrieveBankStatementItemDTO = {
-        amount: bt.value,
-        balancePrev,
-        newBalance: 0,
-        dtRef: moment(bt.compensationDate).toDate(),
-        typeTransaction: bt.typeTransaction,
-        memo: '-',
-      };
-
-      const balanceBefore = balancePrev; // salva o saldo anterior antes da taxa
-      const balanceGain = balanceBefore * bt.profitability.tax; // o balanço ganho com a aplicação da taxa
-      balancePrev += balanceGain; // pega o saldo que tinha naquele dia e soma com o balanço
-      obj.newBalance = balancePrev; // o objeto registra o novo saldo, decorrente da aplicação da taxa
-      obj.amount = balanceGain; // o saldo do objeto é o valor ganho com a taxa
-      obj.typeTransaction = BANK_TRANSACTIONS.typeTransaction.Profitability; // o tipo da transação é profitability
-      obj.memo = 'your $money$ monetizing...!';
-      objs.push(obj);
-
-      dtTransaction.add(1440, 'minute'); // adiciona um dia em minutos
-      // console.log(
-      //   dtNextTransaction.diff(dtTransaction, 'minute'),
-      //   moment(bt.compensationDate),
-      //   dtTransaction,
-      //   dtNextTransaction,
-      //   balanceGain,
-      //   obj,
-      // );
-    }
+  if (
+    transaction.typeTransaction ===
+      BANK_TRANSACTIONS.typeTransaction.Withdraw ||
+    !isReceipt
+  ) {
+    return true;
   }
+  // se foi um depósito ou um recebimento, espera a data de compensação, se não tiver compensado
 
-  return objs;
+  return alreadyCompensated;
+}
+
+// monetiza os valores
+function getMonetizedValue(
+  valueToMonetize: number,
+  tax: number,
+  dtRefBalance: Date,
+): number {
+  if (valueToMonetize > 0 && checkCompensateDateMonetizing(dtRefBalance)) {
+    return valueToMonetize * tax;
+  }
+  return 0;
+}
+
+function getDateLimit(dtLastTransaction: Date) {
+  if (moment(dtLastTransaction).isAfter(moment())) {
+    return dtLastTransaction;
+  }
+  return moment();
 }
 
 @injectable()
@@ -91,48 +110,7 @@ class CalculateBalanceAndExtractService {
     from,
     to,
   }: IRequest): Promise<IRetrieveBankStatementDTO> {
-    const objs: IRetrieveBankStatementItemDTO[] = [
-      {
-        amount: 0,
-        balancePrev: 0,
-        dtRef: new Date(),
-        newBalance: 0,
-        typeTransaction: '-',
-        memo: '-',
-      },
-    ];
-    let balancePrev = 0;
-
-    banksTransactions.forEach((bt, index, array) => {
-      const amount = getValueAmount(bt.typeTransaction, bt.value);
-      const obj: IRetrieveBankStatementItemDTO = {
-        amount,
-        balancePrev,
-        newBalance: balancePrev + amount,
-        dtRef: moment(bt.compensationDate).toDate(),
-        typeTransaction: bt.typeTransaction,
-        memo: bt.memo,
-      };
-
-      balancePrev += obj.amount; // acumula o valor anterior
-
-      objs.push(obj);
-
-      const objsProfitabilities = getProfitabilityObjs(
-        balancePrev,
-        bt,
-        index < array.length ? array[index + 1] : undefined, // se não tem próximo, manda undefined
-      );
-
-      // adiciona os objetos profitabilities após as transações correspondentes
-      if (objsProfitabilities.length > 0) {
-        objsProfitabilities.forEach(objP => {
-          objs.push(objP);
-        });
-        balancePrev =
-          objsProfitabilities[objsProfitabilities.length - 1].newBalance; // atualiza o balanço anterior com o último balanço dos profitabilities
-      }
-    });
+    const objs: IRetrieveBankStatementItemDTO[] = [];
 
     const result: IRetrieveBankStatementDTO = {
       bankAccount: {
@@ -149,34 +127,100 @@ class CalculateBalanceAndExtractService {
       },
     };
 
-    if (result.extract.objs.length > 0) {
-      result.extract.objs.splice(0, 1); // remove o primeiro elemento, que era zerado
-      result.balance =
-        result.extract.objs[result.extract.objs.length - 1].newBalance; // pega o balanço da última posição
-    }
+    // pressupoe-se que as datas já vieram ordenadas da consulta
+    if (banksTransactions.length > 0) {
+      let balancePrevAndFinal = 0;
+      let taxProfitability = 0;
+      const dtStart = moment(banksTransactions[0].compensationDate).startOf(
+        'day',
+      );
+      const dtEnd = moment(
+        banksTransactions[banksTransactions.length - 1].compensationDate,
+      );
 
-    // filra os objetos conforme from and to
-
-    if (from && to) {
-      const resultFiltred = result.extract.objs.filter(obj => {
-        const fromDate = moment(from).set({
-          hour: 0,
-          minute: 0,
-          second: 0,
-          millisecond: 0,
+      while (dtStart.isSameOrBefore(getDateLimit(dtEnd.toDate()))) {
+        const transactionsInSameDtRef = banksTransactions.filter(bt => {
+          return dtStart.isSame(moment(bt.compensationDate), 'day');
         });
-        const toDate = moment(to).set({
-          hour: 23,
-          minute: 59,
-          second: 59,
-          millisecond: 999,
+
+        let minBalanceInDay = -1;
+        // eslint-disable-next-line no-loop-func
+        transactionsInSameDtRef.forEach((bt, index, array) => {
+          const alreadyCompensated = checkCompensateTypeTransactionForSecurityBalance(
+            bt,
+            bankAccount,
+          );
+          const amount = getValueAmount(bt.typeTransaction, bt.value);
+
+          const obj: IRetrieveBankStatementItemDTO = {
+            amount,
+            balancePrev: balancePrevAndFinal,
+            newBalance: balancePrevAndFinal + amount,
+            dtRef: moment(bt.compensationDate).utc(true).toDate(),
+            typeTransaction: bt.typeTransaction,
+            memo: bt.memo,
+          };
+
+          if (alreadyCompensated) {
+            balancePrevAndFinal += amount; // acumula o valor anterior
+          }
+
+          if (index === 0) {
+            minBalanceInDay = balancePrevAndFinal;
+          } else if (balancePrevAndFinal < minBalanceInDay) {
+            minBalanceInDay = balancePrevAndFinal;
+          }
+
+          objs.push(obj);
         });
-        return moment(obj.dtRef).isBetween(fromDate, toDate);
-      });
 
-      result.extract.objs = resultFiltred;
+        taxProfitability = getTaxProfitability(
+          transactionsInSameDtRef,
+          taxProfitability,
+        );
+
+        const valueProfitability = getMonetizedValue(
+          minBalanceInDay,
+          taxProfitability,
+          dtStart.toDate(),
+        );
+
+        if (valueProfitability > 0) {
+          const obj: IRetrieveBankStatementItemDTO = {
+            amount: valueProfitability,
+            balancePrev: balancePrevAndFinal,
+            balanceMonetizing: minBalanceInDay,
+            newBalance: balancePrevAndFinal + valueProfitability,
+            dtRef: moment(dtStart)
+              .utc(true)
+              .add(1, 'day')
+              .startOf('day')
+              .toDate(),
+            typeTransaction: BANK_TRANSACTIONS.typeTransaction.Profitability,
+            memo: 'your $money$ monetizing...!',
+          };
+
+          balancePrevAndFinal += valueProfitability;
+          objs.push(obj);
+        }
+
+        dtStart.add(1, 'day').startOf('day'); // adiciona um dia completo
+      }
+
+      // filra os objetos conforme from and to
+
+      result.extract.objs = objs;
+      result.balance = balancePrevAndFinal;
+
+      if (from && to) {
+        const resultFiltred = result.extract.objs.filter(obj => {
+          const fromDate = moment(from).startOf('day');
+          const toDate = moment(to).endOf('day');
+          return moment(obj.dtRef).isBetween(fromDate, toDate);
+        });
+        result.extract.objs = resultFiltred;
+      }
     }
-
     return result;
   }
 }

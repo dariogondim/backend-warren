@@ -1,6 +1,6 @@
 import ICreateDepositDTO from '@modules/bankTransactions/dtos/ICreateDepositDTO';
+import ICreatePaymentDTO from '../dtos/ICreatePaymentDTO';
 import ICreatePaymentOutsideDTO from '../dtos/ICreatePaymentOutsideDTO';
-import ICreatePaymentDTO from '../dtos/ICreatePaymentOutsideDTO';
 import ICreateWithdrawDTO from '../dtos/ICreateWithdrawDTO';
 import BankTransactions from '../infra/typeorm/entities/BankTransactions';
 
@@ -12,5 +12,7 @@ export default interface IBankTransactionsRepository {
       | ICreatePaymentDTO
       | ICreatePaymentOutsideDTO,
   ): Promise<BankTransactions>;
-  findAllByBankAccount(data: string): Promise<BankTransactions[]>;
+  getTransactionsForBalanceByBankAccount(
+    data: string,
+  ): Promise<BankTransactions[]>;
 }

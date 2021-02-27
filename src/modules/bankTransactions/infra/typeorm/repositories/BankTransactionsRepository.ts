@@ -1,4 +1,4 @@
-import { getRepository, MoreThanOrEqual, Repository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 
 import IBankTransactionsRepository from '@modules/bankTransactions/repositories/IBankTransactionsRepository';
 import ICreateDepositDTO from '@modules/bankTransactions/dtos/ICreateDepositDTO';
@@ -14,7 +14,7 @@ class BankTransactionsRepository implements IBankTransactionsRepository {
     this.ormRepository = getRepository(BankTransactions);
   }
 
-  public async findAllByBankAccount(
+  public async getTransactionsForBalanceByBankAccount(
     bank_account_sender_id: string,
   ): Promise<BankTransactions[]> {
     const banksTransactions = await this.ormRepository.find({
@@ -22,10 +22,12 @@ class BankTransactionsRepository implements IBankTransactionsRepository {
         {
           bank_account_sender_id,
         },
-        { created_at: MoreThanOrEqual(new Date()) },
+        {
+          bank_account_recipient_id: bank_account_sender_id,
+        },
       ],
       order: {
-        created_at: 'ASC',
+        compensationDate: 'ASC',
       },
       relations: ['profitability'],
     });

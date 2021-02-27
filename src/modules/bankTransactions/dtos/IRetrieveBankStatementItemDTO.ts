@@ -5,4 +5,5 @@ export default interface IRetrieveBankStatementItemDTO {
   dtRef: Date;
   typeTransaction: string;
   memo: string;
+  balanceMonetizing?: number;
 }

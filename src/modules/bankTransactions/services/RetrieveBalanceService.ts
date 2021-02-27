@@ -90,7 +90,7 @@ class RetrieveBalanceService {
       );
     }
 
-    const banksTransactions = await this.bankTransactionsRepository.findAllByBankAccount(
+    const banksTransactions = await this.bankTransactionsRepository.getTransactionsForBalanceByBankAccount(
       bankAccount.id,
     );
 
