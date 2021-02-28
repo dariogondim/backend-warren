@@ -4,7 +4,7 @@ import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 
 class FakeBankRepository implements IBankRepository {
   public async findById(id: string): Promise<Bank | undefined> {
-    const bank = await fakeDatabase.fakeBanks.find(bk => bk.id === id);
+    const bank = fakeDatabase.fakeBanks.find(bk => bk.id === id);
 
     return bank;
   }

@@ -13,6 +13,12 @@ export const bankFake1 = {
   id: '7d66f18b-f593-4758-a99f-3e458e74b7a4',
 };
 
+export const bankFake2 = {
+  id: '26df645a-76b5-42b4-ace2-e16ab1834cb3',
+  name: 'Banco Bradesco S.A.',
+  cod: '237',
+};
+
 export const agencyFake1 = {
   id: '0df4edcb-db3e-43cb-894a-470095e912a5',
   name: 'Agência Barão de Aracati',
@@ -60,7 +66,7 @@ export const bankAccountFake2 = {
 };
 
 export const depositFake1 = {
-  originTransaction: 'ted',
+  originTransaction: 'pix',
   channel: 'internet_banking',
   channelDescription: 'caixa 3 24 horas, shoping via sul',
   value: 1000.0,
@@ -84,7 +90,7 @@ export const paymentExternalFake1 = {
   channelDescription: 'caixa 3 24 horas, shoping via sul',
   value: 100.0,
   bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
-  bank_destiny_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  bank_destiny_id: '26df645a-76b5-42b4-ace2-e16ab1834cb3',
   agencyDestiny: '298400',
   accountDestiny: '234112201',
   cpfDestiny: '04867354321',
@@ -102,5 +108,5 @@ export const withdrawFake1 = {
 export const getBalanceFake1 = {
   bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
   from: '2021-02-01',
-  to: '2021-02-28',
+  to: '2022-02-28',
 };

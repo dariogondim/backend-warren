@@ -57,7 +57,6 @@ class ValidateTransactionsService {
 
   // payments and withdraws
 
-  //  não há tempo de testar essa, desculpe :(
   public async hasBankValid({
     bank_destiny_id,
     bankRepository,
@@ -69,7 +68,6 @@ class ValidateTransactionsService {
     return bank;
   }
 
-  //  não há tempo de testar essa, desculpe :(
   public async hasPropertyDestinyExternal({
     bank_destiny_id,
     agencyDestiny,
@@ -84,7 +82,6 @@ class ValidateTransactionsService {
     return !!(bank_destiny_id && cpfDestiny && accountDestiny && agencyDestiny);
   }
 
-  //  não há tempo de testar essa, desculpe :(
   public async checkHasBalanceSuficient({
     withdrawValue,
     bankAccount,

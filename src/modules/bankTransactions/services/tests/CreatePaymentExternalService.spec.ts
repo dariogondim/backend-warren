@@ -10,6 +10,7 @@ import {
   bankAccountFake1,
   bankAccountFake2,
   bankFake1,
+  bankFake2,
   clienteHasUserFake1,
   clientFake1,
   depositFake1,
@@ -44,6 +45,7 @@ describe('Test PAYMENT transaction', () => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeBankTransactionsRepository = new FakeBankTransactionsRepository();
     fakeBankAccountRepository = new FakeBankAccountRepository();
+    fakeBankRepository = new FakeBankRepository();
 
     paymentServiceExternal = new CreatePaymentServiceExternal(
       fakeBankTransactionsRepository,
@@ -61,6 +63,7 @@ describe('Test PAYMENT transaction', () => {
     // objetos que criam os relacionamentos para os testes
     const fakeUser = Object.assign(new User(), userFake1);
     const fakeBank = Object.assign(new Bank(), bankFake1);
+    const fakeBank2 = Object.assign(new Bank(), bankFake2);
     const fakeAgency = Object.assign(new Agency(), agencyFake1);
     const fakeClient = Object.assign(new Client(), clientFake1);
     const fakeClientHasUser = Object.assign(
@@ -82,6 +85,7 @@ describe('Test PAYMENT transaction', () => {
     fakeDatabase.fakeClientsHasUsers.push(fakeClientHasUser);
 
     fakeDatabase.fakeBanks.push(fakeBank);
+    fakeDatabase.fakeBanks.push(fakeBank2);
     fakeDatabase.fakeAgencies.push(fakeAgency);
 
     fakeDatabase.fakeProfitabilities.push(fakeProfitability);
@@ -122,6 +126,7 @@ describe('Test PAYMENT transaction', () => {
     await expect(deposit.typeTransaction).toEqual(
       BANK_TRANSACTIONS.typeTransaction.Deposit,
     );
+
     const payment = await paymentServiceExternal.execute({
       ...paymentExternalFake1,
       user_id: userFake1.id,
@@ -240,31 +245,6 @@ describe('Test PAYMENT transaction', () => {
       paymentExternalFake1,
     );
     paymentModified.bank_account_sender_id = 'invalid value';
-
-    const payment = paymentServiceExternal.execute({
-      ...paymentModified,
-      user_id: userFake1.id,
-    });
-
-    await expect(payment).rejects.toBeInstanceOf(AppError);
-  });
-
-  it('The RECIPIENT_ID transaction has value invalid then throw error', async () => {
-    // adicionado depósito para que haja saldo para o pagamento
-    const deposit = await depositService.execute({
-      ...depositFake1,
-      user_id: userFake1.id,
-    });
-
-    await expect(deposit.typeTransaction).toEqual(
-      BANK_TRANSACTIONS.typeTransaction.Deposit,
-    );
-
-    const paymentModified = Object.assign(
-      new BankTransactions(),
-      paymentExternalFake1,
-    );
-    paymentModified.bank_account_recipient_id = 'invalid value';
 
     const payment = paymentServiceExternal.execute({
       ...paymentModified,

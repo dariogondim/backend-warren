@@ -98,6 +98,8 @@ describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
       user_id: userFake1.id,
     });
 
+    console.log(fakeDatabase.fakeBanksTransactions);
+
     await expect(deposit.typeTransaction).toEqual(
       BANK_TRANSACTIONS.typeTransaction.Deposit,
     );
@@ -106,6 +108,8 @@ describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
       ...getBalanceFake1,
       user_id: userFake1.id,
     });
+
+    console.log(balance);
 
     await expect(balance.balance).toEqual(100);
   });
