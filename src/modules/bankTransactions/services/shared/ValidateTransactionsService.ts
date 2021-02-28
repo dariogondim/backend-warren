@@ -46,7 +46,7 @@ class ValidateTransactionsService {
     client_id: string | undefined;
   }): Promise<boolean> {
     const user = await userRepository.findById(user_id);
-    // console.log('PPPP', user_id, user, client_id, user?.clients_has_users);
+    console.log('PPPP', user_id, user, client_id, user?.clients_has_users);
     return !!(
       user &&
       user.clients_has_users.length > 0 &&

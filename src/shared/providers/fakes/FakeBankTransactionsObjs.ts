@@ -98,3 +98,9 @@ export const withdrawFake1 = {
   bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
   memo: 'saque compras',
 };
+
+export const getBalanceFake1 = {
+  bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  from: '2021-02-01',
+  to: '2021-02-28',
+};
