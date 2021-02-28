@@ -33,6 +33,8 @@ class User {
 
   @OneToMany(() => ClientsHasUsers, clientsHasUsers => clientsHasUsers.user)
   clients_has_users: ClientsHasUsers[];
+
+  clients_has_users_id?: string;
 }
 
 export default User;
