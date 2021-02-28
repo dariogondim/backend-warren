@@ -50,6 +50,15 @@ export const bankAccountFake1 = {
   profitability_id: 'eb85f0f2-2526-4935-b005-78d048c599f7',
 };
 
+export const bankAccountFake2 = {
+  id: '1a2f0a9e-2167-4eb0-99fb-cc7c738dee97',
+  cc: '10394516',
+  agency_id: 'f978b2e4-fd61-4b8c-adaf-f5cbddc46102',
+  client_id: 'ff977231-dafa-4c59-94dc-9b0089c8576c',
+  type: 'currency',
+  profitability_id: 'eb85f0f2-2526-4935-b005-78d048c599f7',
+};
+
 export const depositFake1 = {
   originTransaction: 'ted',
   channel: 'internet_banking',
@@ -57,4 +66,35 @@ export const depositFake1 = {
   value: 1000.0,
   bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
   memo: 'salario fev',
+};
+
+export const paymentFake1 = {
+  originTransaction: 'pix',
+  channel: 'internet_banking',
+  channelDescription: 'caixa 3 24 horas, shoping via sul,',
+  value: 100.0,
+  bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  bank_account_recipient_id: '1a2f0a9e-2167-4eb0-99fb-cc7c738dee97',
+  memo: 'transf pag serv',
+};
+
+export const paymentExternalFake1 = {
+  originTransaction: 'pix',
+  channel: 'internet_banking',
+  channelDescription: 'caixa 3 24 horas, shoping via sul',
+  value: 100.0,
+  bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  bank_destiny_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  agencyDestiny: '298400',
+  accountDestiny: '234112201',
+  cpfDestiny: '04867354321',
+  memo: 'transf pag serv',
+};
+
+export const withdrawFake1 = {
+  channel: 'internet_banking',
+  channelDescription: 'caixa 3 24 horas, shoping via sul,',
+  value: 500.0,
+  bank_account_sender_id: '50cde7c1-4e1e-44b1-aefc-671ce2b6c673',
+  memo: 'saque compras',
 };

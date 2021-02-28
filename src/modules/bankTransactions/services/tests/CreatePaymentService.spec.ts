@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import Agency from '@modules/agencies/infra/typeorm/entities/Agency';
 import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import FakeBankAccountRepository from '@modules/bankAccounts/repositories/fakes/FakeBankAccountRepository';
@@ -11,6 +13,7 @@ import {
   clienteHasUserFake1,
   clientFake1,
   depositFake1,
+  paymentFake1,
   profitabilityFake1,
   userFake1,
 } from '@shared/providers/fakes/FakeBankTransactionsObjs';
@@ -19,25 +22,32 @@ import Client from '@modules/clients/infra/typeorm/entities/Client';
 import Profitability from '@modules/profitabilities/infra/typeorm/entities/Profitability';
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import ClientsHasUsers from '@modules/users_has_clients/infra/typeorm/entities/ClientsHasUsers';
-import 'reflect-metadata';
 
 import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 import User from '@modules/users/infra/typeorm/entities/User';
 import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import AppError from '@shared/errors/AppError';
+import CreatePaymentService from '../CreatePaymentService';
 import CreateDepositService from '../CreateDepositService';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeBankTransactionsRepository: FakeBankTransactionsRepository;
 let fakeBankAccountRepository: FakeBankAccountRepository;
 
+let paymentService: CreatePaymentService;
 let depositService: CreateDepositService;
 
-describe('Test DEPOSIT transaction', () => {
+describe('Test PAYMENT transaction', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeBankTransactionsRepository = new FakeBankTransactionsRepository();
     fakeBankAccountRepository = new FakeBankAccountRepository();
+
+    paymentService = new CreatePaymentService(
+      fakeBankTransactionsRepository,
+      fakeUsersRepository,
+      fakeBankAccountRepository,
+    );
 
     depositService = new CreateDepositService(
       fakeBankTransactionsRepository,
@@ -78,7 +88,8 @@ describe('Test DEPOSIT transaction', () => {
     // console.log('AAA', fakeDatabase);
   });
 
-  it('The TYPE_TRANSACTION is DEPOSIT', async () => {
+  it('The TYPE_TRANSACTION is PAYMENT', async () => {
+    // adicionado depósito para que haja saldo para o pagamento
     const deposit = await depositService.execute({
       ...depositFake1,
       user_id: userFake1.id,
@@ -87,72 +98,162 @@ describe('Test DEPOSIT transaction', () => {
     await expect(deposit.typeTransaction).toEqual(
       BANK_TRANSACTIONS.typeTransaction.Deposit,
     );
+
+    const payment = await paymentService.execute({
+      ...paymentFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Payment,
+    );
   });
 
   it('The STATUS is APPROVED', async () => {
+    // adicionado depósito para que haja saldo para o pagamento
     const deposit = await depositService.execute({
       ...depositFake1,
       user_id: userFake1.id,
     });
 
-    await expect(deposit.status).toEqual(BANK_TRANSACTIONS.status.Approved);
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+    const payment = await paymentService.execute({
+      ...paymentFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment.status).toEqual(BANK_TRANSACTIONS.status.Approved);
   });
 
   it('The ORIGIN transaction has invalid value then throw error', async () => {
-    const depositModified = Object.assign(new BankTransactions(), depositFake1);
-    depositModified.originTransaction = 'invalid value';
-
-    const deposit = depositService.execute({
-      ...depositModified,
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
+      ...depositFake1,
       user_id: userFake1.id,
     });
 
-    await expect(deposit).rejects.toBeInstanceOf(AppError);
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const paymentModified = Object.assign(new BankTransactions(), paymentFake1);
+    paymentModified.originTransaction = 'invalid value';
+
+    const payment = paymentService.execute({
+      ...paymentModified,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
   });
 
   it('The CHANNEL transaction has invalid value then throw error', async () => {
-    const depositModified = Object.assign(new BankTransactions(), depositFake1);
-    depositModified.channel = 'invalid value';
-
-    const deposit = depositService.execute({
-      ...depositModified,
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
+      ...depositFake1,
       user_id: userFake1.id,
     });
 
-    await expect(deposit).rejects.toBeInstanceOf(AppError);
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const paymentModified = Object.assign(new BankTransactions(), paymentFake1);
+    paymentModified.channel = 'invalid value';
+
+    const payment = paymentService.execute({
+      ...paymentModified,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
   });
 
   it('The VALUE transaction has NEGATIVE value, then throw error', async () => {
-    const depositModified = Object.assign(new BankTransactions(), depositFake1);
-    depositModified.value = -100;
-
-    const deposit = depositService.execute({
-      ...depositModified,
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
+      ...depositFake1,
       user_id: userFake1.id,
     });
 
-    await expect(deposit).rejects.toBeInstanceOf(AppError);
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const paymentModified = Object.assign(new BankTransactions(), paymentFake1);
+    paymentModified.value = -100;
+
+    const payment = paymentService.execute({
+      ...paymentModified,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
   });
 
   it('The TOKEN HAS NOT ASSOCIATED transaction then throw error', async () => {
-    const deposit = depositService.execute({
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
       ...depositFake1,
-      user_id: 'invalid value',
-    });
-
-    await expect(deposit).rejects.toBeInstanceOf(AppError);
-  });
-
-  it('The SENDER_ID transaction has value invalid then throw error', async () => {
-    const depositModified = Object.assign(new BankTransactions(), depositFake1);
-    depositModified.bank_account_sender_id = 'invalid value';
-
-    const deposit = depositService.execute({
-      ...depositModified,
       user_id: userFake1.id,
     });
 
-    await expect(deposit).rejects.toBeInstanceOf(AppError);
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const payment = paymentService.execute({
+      ...paymentFake1,
+      user_id: 'invalid value',
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('The SENDER_ID transaction has value invalid then throw error', async () => {
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
+      ...depositFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const paymentModified = Object.assign(new BankTransactions(), paymentFake1);
+    paymentModified.bank_account_sender_id = 'invalid value';
+
+    const payment = paymentService.execute({
+      ...paymentModified,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('The RECIPIENT_ID transaction has value invalid then throw error', async () => {
+    // adicionado depósito para que haja saldo para o pagamento
+    const deposit = await depositService.execute({
+      ...depositFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(deposit.typeTransaction).toEqual(
+      BANK_TRANSACTIONS.typeTransaction.Deposit,
+    );
+
+    const paymentModified = Object.assign(new BankTransactions(), paymentFake1);
+    paymentModified.bank_account_recipient_id = 'invalid value';
+
+    const payment = paymentService.execute({
+      ...paymentModified,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
   });
 });
 

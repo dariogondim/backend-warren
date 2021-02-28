@@ -57,6 +57,12 @@ class CreatePaymentServiceExternal {
 
     const validateService = container.resolve(ValidateTransactionsService);
 
+    if (
+      !(await validateService.validateOriginTransaction({ originTransaction }))
+    ) {
+      throw new AppError('Origin transaction does not have a valid value');
+    }
+
     if (!(await validateService.validateChannelTransaction({ channel }))) {
       throw new AppError('Channel transaction does not have a valid value');
     }

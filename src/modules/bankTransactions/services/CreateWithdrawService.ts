@@ -59,7 +59,7 @@ class CreateWithdrawService {
     const status = await getObjsService.getBankTransactionsStatusApproved();
     const typeTransaction = await getObjsService.getBankTransactionsTypeTransactionWithdraw();
 
-    const originTransaction = await getObjsService.getBankTransactionsTypeTransactionWithdraw(); // irrelevante em saques
+    const originTransaction = await getObjsService.getOriginTransactionTedForWithdraw(); // irrelevante em saques
 
     const compensationDate = await getObjsService.getCompensationDate({
       originTransaction,

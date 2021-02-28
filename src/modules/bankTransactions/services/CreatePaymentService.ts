@@ -46,6 +46,12 @@ class CreatePaymentService {
 
     const validateService = container.resolve(ValidateTransactionsService);
 
+    if (
+      !(await validateService.validateOriginTransaction({ originTransaction }))
+    ) {
+      throw new AppError('Origin transaction does not have a valid value');
+    }
+
     if (!(await validateService.validateChannelTransaction({ channel }))) {
       throw new AppError('Channel transaction does not have a valid value');
     }
@@ -70,6 +76,15 @@ class CreatePaymentService {
     const compensationDate = await getObjsService.getCompensationDate({
       originTransaction,
     });
+
+    const bankAccountReceipt = await getObjsService.getBankAccountObject(
+      bank_account_recipient_id,
+      this.bankAccountRepository,
+    );
+
+    if (!bankAccountReceipt) {
+      throw new AppError('The bank account destiny not found', 404);
+    }
 
     const bankAccount = await getObjsService.getBankAccountObject(
       bank_account_sender_id,
