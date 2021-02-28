@@ -145,7 +145,7 @@ class CalculateBalanceAndExtractService {
 
         let minBalanceInDay = -1;
         // eslint-disable-next-line no-loop-func
-        transactionsInSameDtRef.forEach((bt, index, array) => {
+        transactionsInSameDtRef.forEach((bt, index) => {
           const alreadyCompensated = checkCompensateTypeTransactionForSecurityBalance(
             bt,
             bankAccount,

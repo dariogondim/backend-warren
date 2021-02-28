@@ -1,83 +1,12 @@
 import { injectable, inject, container } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
-import moment from 'moment';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
-import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import IBankTransactionsRepository from '../repositories/IBankTransactionsRepository';
 import BankTransactions from '../infra/typeorm/entities/BankTransactions';
-import {
-  BANK_TRANSACTIONS,
-  BANK_TRANSACTIONS2,
-} from '../infra/typeorm/constants/BankTransactions.constants';
-import CalculateBalanceAndExtractService from './shared/CalculateBalanceAndExtractService';
-
-function validateChannelTransaction(channelTransaction: string) {
-  return BANK_TRANSACTIONS2.channel.includes(channelTransaction);
-}
-
-function hasBankAccountSenderId(bank_account_sender_id: string) {
-  return bank_account_sender_id;
-}
-
-function validateValue(value: number) {
-  return value > 0;
-}
-
-async function checkTokenClientHasAssociatedBankAccountId(
-  user_id: string,
-  userRepository: IUsersRepository,
-  client_id: string | undefined,
-) {
-  const user = await userRepository.findById(user_id);
-  return (
-    user &&
-    user.clients_has_users.length > 0 &&
-    client_id &&
-    user.clients_has_users[0].client_id === client_id
-  );
-}
-
-async function getBankAccountObject(
-  bank_account_sender_id: string,
-  bankAccountRepository: IBankAccountRepository,
-): Promise<BankAccount | undefined> {
-  const bankAccount = await bankAccountRepository.findById(
-    bank_account_sender_id,
-  );
-  return bankAccount;
-}
-
-function getCompensationDate(): Date {
-  return moment().toDate(); // compensa tão cedo quanto possível
-}
-
-async function checkHasBalanceSuficient(
-  withdrawValue: number,
-  bankAccount: BankAccount,
-  bankTransactionsRepository: IBankTransactionsRepository,
-) {
-  const banksTransactions = await bankTransactionsRepository.getTransactionsForBalanceByBankAccount(
-    bankAccount.id,
-  );
-
-  const calculateBalanceAndExtractService = container.resolve(
-    CalculateBalanceAndExtractService,
-  );
-
-  const result = await calculateBalanceAndExtractService.execute({
-    banksTransactions,
-    bankAccount,
-  });
-
-  const balanceCurrent = result.balance;
-
-  const overdraft = 0; // chque especial
-  console.log(JSON.stringify(result));
-
-  return balanceCurrent + overdraft >= withdrawValue;
-}
+import ValidateTransactionsService from './shared/ValidateTransactionsService';
+import GetObjsTransactionsService from './shared/GetObjsTransactionsService';
 
 interface IRequest {
   channel: string;
@@ -111,25 +40,32 @@ class CreateWithdrawService {
   }: IRequest): Promise<BankTransactions> {
     // bussiness roles
 
-    if (!validateChannelTransaction(channel)) {
+    const validateService = container.resolve(ValidateTransactionsService);
+
+    if (!(await validateService.validateChannelTransaction({ channel }))) {
       throw new AppError('Channel transaction does not have a valid value');
     }
 
-    if (!hasBankAccountSenderId(bank_account_sender_id)) {
+    if (!bank_account_sender_id) {
       throw new AppError('The bank account needs to be selected');
     }
 
-    if (!validateValue(value)) {
+    if (!(await validateService.bankTransactionsHasPositiveValue({ value }))) {
       throw new AppError('The value transaction is a invalid value');
     }
 
-    const status = BANK_TRANSACTIONS.status.Approved;
-    const typeTransaction = BANK_TRANSACTIONS.typeTransaction.Withdraw;
-    const originTransaction = BANK_TRANSACTIONS.originTransaction.Ted; // irrelevante em saques
+    const getObjsService = container.resolve(GetObjsTransactionsService);
 
-    const compensationDate = getCompensationDate();
+    const status = await getObjsService.getBankTransactionsStatusApproved();
+    const typeTransaction = await getObjsService.getBankTransactionsTypeTransactionWithdraw();
 
-    const bankAccount = await getBankAccountObject(
+    const originTransaction = await getObjsService.getBankTransactionsTypeTransactionWithdraw(); // irrelevante em saques
+
+    const compensationDate = await getObjsService.getCompensationDate({
+      originTransaction,
+    });
+
+    const bankAccount = await getObjsService.getBankAccountObject(
       bank_account_sender_id,
       this.bankAccountRepository,
     );
@@ -139,11 +75,11 @@ class CreateWithdrawService {
     }
 
     if (
-      !(await checkTokenClientHasAssociatedBankAccountId(
+      !(await validateService.checkTokenClientHasAssociatedBankAccountId({
         user_id,
-        this.usersRepository,
-        bankAccount?.client_id,
-      ))
+        userRepository: this.usersRepository,
+        client_id: bankAccount.client_id,
+      }))
     ) {
       throw new AppError(
         'You do not have permission to access this account',
@@ -152,11 +88,11 @@ class CreateWithdrawService {
     }
 
     if (
-      !(await checkHasBalanceSuficient(
-        value,
+      !(await validateService.checkHasBalanceSuficient({
+        withdrawValue: value,
         bankAccount,
-        this.bankTransactionsRepository,
-      ))
+        bankTransactionsRepository: this.bankTransactionsRepository,
+      }))
     ) {
       throw new AppError('Insufficient funds');
     }

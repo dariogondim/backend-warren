@@ -1,40 +1,13 @@
 import { injectable, inject, container } from 'tsyringe';
 
-import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import AppError from '@shared/errors/AppError';
 import IBankTransactionsRepository from '../repositories/IBankTransactionsRepository';
 import CalculateBalanceAndExtractService from './shared/CalculateBalanceAndExtractService';
 import IRetrieveBankStatementDTO from '../dtos/IRetrieveBankStatementDTO';
-
-function hasBankAccountSenderId(bank_account_sender_id: string) {
-  return bank_account_sender_id;
-}
-
-async function checkTokenClientHasAssociatedBankAccountId(
-  user_id: string,
-  userRepository: IUsersRepository,
-  client_id: string | undefined,
-) {
-  const user = await userRepository.findById(user_id);
-  return (
-    user &&
-    user.clients_has_users.length > 0 &&
-    client_id &&
-    user.clients_has_users[0].client_id === client_id
-  );
-}
-
-async function getBankAccountObject(
-  bank_account_sender_id: string,
-  bankAccountRepository: IBankAccountRepository,
-): Promise<BankAccount | undefined> {
-  const bankAccount = await bankAccountRepository.findById(
-    bank_account_sender_id,
-  );
-  return bankAccount;
-}
+import ValidateTransactionsService from './shared/ValidateTransactionsService';
+import GetObjsTransactionsService from './shared/GetObjsTransactionsService';
 
 interface IRequest {
   bank_account_sender_id: string; // de onde parte o saque
@@ -64,11 +37,15 @@ class RetrieveBalanceService {
   }: IRequest): Promise<IRetrieveBankStatementDTO> {
     // bussiness rules
 
-    if (!hasBankAccountSenderId(bank_account_sender_id)) {
+    const validateService = container.resolve(ValidateTransactionsService);
+
+    if (!bank_account_sender_id) {
       throw new AppError('The bank account needs to be selected');
     }
 
-    const bankAccount = await getBankAccountObject(
+    const getObjsService = container.resolve(GetObjsTransactionsService);
+
+    const bankAccount = await getObjsService.getBankAccountObject(
       bank_account_sender_id,
       this.bankAccountRepository,
     );
@@ -78,11 +55,11 @@ class RetrieveBalanceService {
     }
 
     if (
-      !(await checkTokenClientHasAssociatedBankAccountId(
+      !(await validateService.checkTokenClientHasAssociatedBankAccountId({
         user_id,
-        this.usersRepository,
-        bankAccount?.client_id,
-      ))
+        userRepository: this.usersRepository,
+        client_id: bankAccount.client_id,
+      }))
     ) {
       throw new AppError(
         'You do not have permission to access this account',
