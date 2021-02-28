@@ -1,4 +1,5 @@
 import AppError from '@shared/errors/AppError';
+import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import ShowProfileService from './ShowProfileService';
@@ -8,6 +9,8 @@ let showProfile: ShowProfileService;
 
 describe('ShowProfile', () => {
   beforeEach(() => {
+    fakeDatabase.resetDatabase();
+
     fakeUsersRepository = new FakeUsersRepository();
 
     showProfile = new ShowProfileService(fakeUsersRepository);

@@ -1,5 +1,6 @@
 import AppError from '@shared/errors/AppError';
 
+import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '../providers/HashProvider/fakes/FakeHashProvider';
 import CreateUserService from './CreateUserService';
@@ -10,6 +11,8 @@ let createUser: CreateUserService;
 
 describe('CreateUser', () => {
   beforeEach(() => {
+    fakeDatabase.resetDatabase();
+
     fakeUsersRepository = new FakeUsersRepository();
     fakeHashProvider = new FakeHashProvider();
     createUser = new CreateUserService(fakeUsersRepository, fakeHashProvider);

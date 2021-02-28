@@ -1,4 +1,5 @@
 import AppError from '@shared/errors/AppError';
+import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 
 import FakeHashProvider from '../providers/HashProvider/fakes/FakeHashProvider';
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
@@ -10,6 +11,8 @@ let updateProfile: UpdateProfileService;
 
 describe('UpdateProfile', () => {
   beforeEach(() => {
+    fakeDatabase.resetDatabase();
+
     fakeUsersRepository = new FakeUsersRepository();
     fakeHashProvider = new FakeHashProvider();
 
