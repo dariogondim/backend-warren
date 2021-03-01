@@ -14,8 +14,11 @@ import {
   clientFake1,
   depositFake1,
   getBalanceFake1,
+  paymentExternalFake1,
+  paymentFake1,
   profitabilityFake1,
   userFake1,
+  withdrawFake1,
 } from '@shared/providers/fakes/FakeBankTransactionsObjs';
 import FakeBankTransactionsRepository from '@modules/bankTransactions/repositories/fakes/FakeBankTransactionsRepository';
 import Client from '@modules/clients/infra/typeorm/entities/Client';
@@ -27,21 +30,30 @@ import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 import User from '@modules/users/infra/typeorm/entities/User';
 import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import AppError from '@shared/errors/AppError';
+import FakeBankRepository from '@modules/banks/repositories/fakes/FakeBankRepository';
 import CreateDepositService from '../CreateDepositService';
 import RetrieveBalanceService from '../RetrieveBalanceService';
+import CreateWithdrawService from '../CreateWithdrawService';
+import CreatePaymentService from '../CreatePaymentService';
+import CreatePaymentServiceExternal from '../CreatePaymentServiceExternal';
 
 let fakeUsersRepository: FakeUsersRepository;
 let fakeBankTransactionsRepository: FakeBankTransactionsRepository;
 let fakeBankAccountRepository: FakeBankAccountRepository;
+let fakeBankRepository: FakeBankRepository;
 
 let retrieveBalanceService: RetrieveBalanceService;
 let depositService: CreateDepositService;
+let withdrawService: CreateWithdrawService;
+let paymentService: CreatePaymentService;
+let paymentServiceExternal: CreatePaymentServiceExternal;
 
 describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository();
     fakeBankTransactionsRepository = new FakeBankTransactionsRepository();
     fakeBankAccountRepository = new FakeBankAccountRepository();
+    fakeBankRepository = new FakeBankRepository();
 
     retrieveBalanceService = new RetrieveBalanceService(
       fakeBankTransactionsRepository,
@@ -50,6 +62,25 @@ describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
     );
 
     depositService = new CreateDepositService(
+      fakeBankTransactionsRepository,
+      fakeUsersRepository,
+      fakeBankAccountRepository,
+    );
+
+    withdrawService = new CreateWithdrawService(
+      fakeBankTransactionsRepository,
+      fakeUsersRepository,
+      fakeBankAccountRepository,
+    );
+
+    paymentServiceExternal = new CreatePaymentServiceExternal(
+      fakeBankTransactionsRepository,
+      fakeUsersRepository,
+      fakeBankAccountRepository,
+      fakeBankRepository,
+    );
+
+    paymentService = new CreatePaymentService(
       fakeBankTransactionsRepository,
       fakeUsersRepository,
       fakeBankAccountRepository,
@@ -88,7 +119,7 @@ describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
     // console.log('AAA', fakeDatabase);
   });
 
-  it('The Balance deposit examples with 100,00 return correct balance', async () => {
+  it('The Balance DEPOSIT examples with 100,00 return correct balance', async () => {
     const depositModified = Object.assign(new BankTransactions(), depositFake1);
 
     depositModified.value = 100;
@@ -108,6 +139,33 @@ describe('Test BALANCE (ONLY CREATE, NOT BALANCEs) transaction', () => {
     });
 
     await expect(balance.balance).toEqual(100);
+  });
+
+  it('The Balance WITHDRAW examples with 100,00 return insuficient funds', async () => {
+    const withdraw = withdrawService.execute({
+      ...withdrawFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(withdraw).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('The Balance PAYMENT examples with 100,00 return insuficient funds', async () => {
+    const payment = paymentService.execute({
+      ...paymentFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(payment).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('The Balance PAYMENT EXTERNAL examples with 100,00 return insuficient funds', async () => {
+    const paymentExternal = paymentServiceExternal.execute({
+      ...paymentExternalFake1,
+      user_id: userFake1.id,
+    });
+
+    await expect(paymentExternal).rejects.toBeInstanceOf(AppError);
   });
 
   it('The TOKEN HAS NOT ASSOCIATED transaction then throw error', async () => {

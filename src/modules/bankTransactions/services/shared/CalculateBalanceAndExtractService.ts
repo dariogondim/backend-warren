@@ -1,4 +1,4 @@
-import { injectable } from 'tsyringe';
+import { container, injectable } from 'tsyringe';
 
 import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import IRetrieveBankStatementDTO from '@modules/bankTransactions/dtos/IRetrieveBankStatementDTO';
@@ -6,6 +6,7 @@ import IRetrieveBankStatementItemDTO from '@modules/bankTransactions/dtos/IRetri
 import { BANK_TRANSACTIONS } from '@modules/bankTransactions/infra/typeorm/constants/BankTransactions.constants';
 import moment from 'moment';
 import BankTransactions from '../../infra/typeorm/entities/BankTransactions';
+import GetObjsTransactionsService from './GetObjsTransactionsService';
 
 interface IRequest {
   banksTransactions: BankTransactions[];
@@ -42,21 +43,6 @@ function getTaxProfitability(
   return taxProfitabilityBefore;
 }
 
-function checkCompensateDateMonetizing(
-  dtMonetizing: Date,
-  periodMonetizing = 1,
-  limitDaysMonetizingBefore = 1,
-) {
-  const dtMonetizingM = moment(dtMonetizing)
-    .add(periodMonetizing, 'day')
-    .startOf('day');
-  // ex. se hoje é 26, monetiza todos os saldos até o final do dia 24
-  const limit = moment()
-    .subtract(limitDaysMonetizingBefore, 'day')
-    .endOf('day');
-  return dtMonetizingM.isSameOrBefore(limit);
-}
-
 // só compensa imediatamente, pagamentos, para efeitos de saldo, embora só vão entrar no futuro, porque podem ser cancelados
 function checkCompensateTypeTransactionForSecurityBalance(
   transaction: BankTransactions,
@@ -81,18 +67,6 @@ function checkCompensateTypeTransactionForSecurityBalance(
   // se foi um depósito ou um recebimento, espera a data de compensação, se não tiver compensado
 
   return alreadyCompensated;
-}
-
-// monetiza os valores
-function getMonetizedValue(
-  valueToMonetize: number,
-  tax: number,
-  dtRefBalance: Date,
-): number {
-  if (valueToMonetize > 0 && checkCompensateDateMonetizing(dtRefBalance)) {
-    return valueToMonetize * tax;
-  }
-  return 0;
 }
 
 function getDateLimit(dtLastTransaction: Date) {
@@ -129,6 +103,8 @@ class CalculateBalanceAndExtractService {
 
     // pressupoe-se que as datas já vieram ordenadas da consulta
     if (banksTransactions.length > 0) {
+      const getObjsService = container.resolve(GetObjsTransactionsService);
+
       let balancePrevAndFinal = 0;
       let taxProfitability = 0;
       const dtStart = moment(banksTransactions[0].compensationDate).startOf(
@@ -143,7 +119,8 @@ class CalculateBalanceAndExtractService {
           return dtStart.isSame(moment(bt.compensationDate), 'day');
         });
 
-        let minBalanceInDay = -1;
+        let minBalanceInDay =
+          transactionsInSameDtRef.length === 0 ? balancePrevAndFinal : -1;
         // eslint-disable-next-line no-loop-func
         transactionsInSameDtRef.forEach((bt, index) => {
           const alreadyCompensated = checkCompensateTypeTransactionForSecurityBalance(
@@ -179,12 +156,11 @@ class CalculateBalanceAndExtractService {
           taxProfitability,
         );
 
-        const valueProfitability = getMonetizedValue(
+        const valueProfitability = getObjsService.getMonetizedValue(
           minBalanceInDay,
           taxProfitability,
           dtStart.toDate(),
         );
-
         if (valueProfitability > 0) {
           const obj: IRetrieveBankStatementItemDTO = {
             amount: valueProfitability,

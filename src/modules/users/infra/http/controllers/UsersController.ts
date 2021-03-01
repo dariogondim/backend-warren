@@ -3,7 +3,6 @@ import { container } from 'tsyringe';
 
 import CreateUserService from '@modules/users/services/CreateUserService';
 import CreateClientsHasUsersService from '@modules/users_has_clients/services/CreateClientsHasUsersService';
-import { Transaction } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 export default class SessionsController {
@@ -30,7 +29,7 @@ export default class SessionsController {
 
     const createClientHasUser = container.resolve(CreateClientsHasUsersService);
 
-    const userHasClient = await createClientHasUser.execute({
+    await createClientHasUser.execute({
       user_id: user.id,
       client_id,
     });

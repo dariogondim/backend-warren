@@ -72,6 +72,36 @@ class GetObjsTransactionsService {
     );
     return bankAccount;
   }
+
+  // monetiza os valores
+  public getMonetizedValue(
+    valueToMonetize: number,
+    tax: number,
+    dtRefBalance: Date,
+  ): number {
+    if (
+      valueToMonetize > 0 &&
+      this.checkCompensateDateMonetizing(dtRefBalance)
+    ) {
+      return valueToMonetize * tax;
+    }
+    return 0;
+  }
+
+  checkCompensateDateMonetizing(
+    dtMonetizing: Date,
+    periodMonetizing = 1,
+    limitDaysMonetizingBefore = 1,
+  ): boolean {
+    const dtMonetizingM = moment(dtMonetizing)
+      .add(periodMonetizing, 'day')
+      .startOf('day');
+    // ex. se hoje é 26, monetiza todos os saldos até o final do dia 24
+    const limit = moment()
+      .subtract(limitDaysMonetizingBefore, 'day')
+      .endOf('day');
+    return dtMonetizingM.isSameOrBefore(limit);
+  }
 }
 
 export default GetObjsTransactionsService;
