@@ -21,21 +21,37 @@
 ### 🔧 Instalação
 
 clonar este repositório, comando: <b> git clone https://github.com/dariogondim/backend-warren </b>
+Se você não tem o git, faça o download em: https://git-scm.com/downloads
 
-Depois de baixar, vá até as pastas back-end e front-end para instalar as dependências do node:
+Se você não tiver <b>yarn</b> instalado, baixe em: https://classic.yarnpkg.com/en/docs/install/#debian-stable
+Execute <b> yarn --version </b> para se certificar que tudo correu bem, ele deve retornar algo como <b>1.22.5</b>
+
+Se você não tiver o node instalado, você pode baixar daqui: https://github.com/nvm-sh/nvm
+Após instalar, execute <b> nvm i 14 </b>, para instalar a versão 14 do node
+Após, execute <b> nvm use 14 </b>
+Ele deve retornar algo como <b>Now using node v14.16.0 (npm v6.14.11)</b>
+
+Depois disso, vá até a raiz do projeto, aonde você clonou do git
 
 ```
 cd backend-warren
-yarn install
+yarn
 ```
-Em seguida, adquirir uma imagem docker do postgres, se não tiver instalado localmente em sua máquina.
-Você pode adquiri-la em: https://hub.docker.com/_/postgres. As credencias de acesso e o nome do banco de dados,
-se encontram em um arquivo chamado <b> ormconfig.json </b>, dentro da aplicação. 
-Você deve executar o comando <b> docker run</b> com elas,seguindo as instruções no site do docker acima
+Em seguida, você precisa instalar o postgresql, a maneira mais rápida de fazer isso,
+é com docker.
+Faça o download do docker em:https://www.docker.com/products/docker-desktop
+Após a instalação, certifique-se de que ele foi instalado corretamente, digite: <b>docker --version</b>
+Ele deve retornar algo parecido com: <i>Docker version 19.03.13, build 4484c46d9d</i>
+Se tudo ocorreu bem, execute: <b> docker run --name warren -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres </b>
+O comando retorna um resultado parecido com <b> 4207bb17f1d2fcd442500b3ae2afca2bbddbdd6d6022161c02c49b81c31131fd </b>
+Copie o retorno, que deve ser diferente desse, e
+Execute <b>  docker start 4207bb17f1d2fcd442500b3ae2afca2bbddbdd6d6022161c02c49b81c31131fd  </b>, para iniciar o container,<b>não se esqueça de que isso é 
+um exemplo, o codigo após o start,  deve ser o gerado pela sua máquina</b>
+Qualquer coisa, se perdeu esse codigo, digite <b> docker ps -a</b>, ele deve retornar uma linha, copie da linha de comando o código do container na primeira coluna na linha retornada e então execute o docker start com o código retornado
 
-Finalmente, com o container instalado e em execução,
-execute: <b> yarn typeorm migration:run </b> na raiz do projeto. Este comando irá criar as tabelas do postgres necessárias
-para o projeto e também irá inserir alguns dados para teste.
+Se tudo correu bem, vá até a raiz do seu projeto e execute: <b> yarn typeorm migration:run </b>, isso vai criar o database e os dados de teste
+As instruções de conexão com o banco de dados também estão descritas no arquivo <b> ormconfig.json </b> do projeto, se você já souber como
+fazer esse processo.
 
 Você então, pode iniciar o projeto com o comando: 
 
@@ -72,11 +88,14 @@ Time:        34.703 s
 
 ```
 
+
+Na pasta tmp do projeto, há um arquivo chamado Insomnia_2021-03-01-warren-backend. 
+  Faça o download do programa: <b>https://insomnia.rest/download/</b> e importe esse arquivo. 
+
 ## 📦 Desenvolvimento
-  Na pasta tmp do projeto, há um arquivo chamado Insomnia_2021-03-01-warren-backend. 
-  Faça o download do programa: <b>https://insomnia.rest/download/</b> e importe esse arquivo. Há exemplos de como testar todos os endpoints
-  da aplicação com os dados já previamente inseridos nas migrations do typeorm, mas você pode testar inserindo mais dados, contudo, só há 
-  endpoints implementados para: 
+Há exemplos de como testar todos os endpoints
+  da aplicação com os dados já previamente inseridos nas migrations do typeorm, mas você pode testar inserindo mais dados.
+  Os endpoints criados permitem fazer as seguintes ações:
  
     1. Criação de usuários
     2. Criação de sessões
