@@ -49,6 +49,15 @@ Execute <b>  docker start 4207bb17f1d2fcd442500b3ae2afca2bbddbdd6d6022161c02c49b
 um exemplo, o codigo após o start,  deve ser o gerado pela sua máquina</b>
 Qualquer coisa, se perdeu esse codigo, digite <b> docker ps -a</b>, ele deve retornar uma linha, copie da linha de comando o código do container na primeira coluna na linha retornada e então execute o docker start com o código retornado
 
+<b>Usando a interface de comando ou seu gerenciador postgresql favorito, você deve criar um banco de dados chamdo <i>warren_db</i> em localhost,
+após a conexão com o container tiver sido executada com sucesso</b>
+
+Pela linha de comando, com o container iniciado, verifique se <b>docker ps</b retorn alguma coisa; se retornar, execute
+<b> docker exec -it warren psql -U postgres </b>
+ele deve exibir no terminal algo parecido com <b>postgres=#</b>
+execute <b>create database warren_db;</b>, não se esqueça do ;
+ele deve retornar <b> CREATE DATABASE </b>
+
 Se tudo correu bem, vá até a raiz do seu projeto e execute: <b> yarn typeorm migration:run </b>, isso vai criar o database e os dados de teste
 As instruções de conexão com o banco de dados também estão descritas no arquivo <b> ormconfig.json </b> do projeto, se você já souber como
 fazer esse processo.
