@@ -52,7 +52,7 @@ Qualquer coisa, se perdeu esse codigo, digite <b> docker ps -a</b>, ele deve ret
 <b>Usando a interface de comando ou seu gerenciador postgresql favorito, você deve criar um banco de dados chamdo <i>warren_db</i> em localhost,
 após a conexão com o container tiver sido executada com sucesso</b>
 
-Pela linha de comando, com o container iniciado, verifique se <b>docker ps</b retorn alguma coisa; se retornar, execute
+Pela linha de comando, com o container iniciado, execute <b>docker ps</b> e verifique se retornou alguma coisa; se retornar, execute
 <b> docker exec -it warren psql -U postgres </b>
 ele deve exibir no terminal algo parecido com <b>postgres=#</b>
 execute <b>create database warren_db;</b>, não se esqueça do ;
