@@ -1,6 +1,5 @@
 import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
 import Bank from '@modules/banks/infra/typeorm/entities/Bank';
-import Client from '@modules/clients/infra/typeorm/entities/Client';
 import Profitability from '@modules/profitabilities/infra/typeorm/entities/Profitability';
 import {
   Entity,
@@ -10,12 +9,14 @@ import {
   UpdateDateColumn,
   JoinColumn,
   ManyToOne,
+  ObjectID,
+  ObjectIdColumn,
 } from 'typeorm';
 
 @Entity('bank_transactions')
 class BankTransactions {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @ObjectIdColumn()
+  id: ObjectID;
 
   @Column()
   status: string;
@@ -50,39 +51,31 @@ class BankTransactions {
   @Column()
   memo: string;
 
-  @Column()
+  @Column('uuid')
   bank_destiny_id: string;
 
-  @ManyToOne(() => Bank)
-  @JoinColumn({ name: 'bank_destiny_id' })
-  bank: Bank;
-
-  @Column()
+  @Column('uuid')
   bank_account_sender_id: string;
 
-  @ManyToOne(() => BankAccount)
-  @JoinColumn({ name: 'bank_account_sender_id' })
-  bankAccountSender: BankAccount;
-
-  @Column()
+  @Column('uuid')
   bank_account_recipient_id: string;
 
-  @ManyToOne(() => BankAccount)
-  @JoinColumn({ name: 'bank_account_recipient_id' })
-  bankAccountRecipient: BankAccount;
-
-  @Column()
+  @Column('uuid')
   profitability_id: string;
-
-  @ManyToOne(() => Profitability)
-  @JoinColumn({ name: 'profitability_id' })
-  profitability: Profitability;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  bank: Bank;
+
+  profitability: Profitability;
+
+  bankAccountRecipient: BankAccount;
+
+  bankAccountSender: BankAccount;
 }
 
 export default BankTransactions;

@@ -2,7 +2,7 @@ import ICreateDepositDTO from '@modules/bankTransactions/dtos/ICreateDepositDTO'
 import ICreatePaymentDTO from '../dtos/ICreatePaymentDTO';
 import ICreatePaymentOutsideDTO from '../dtos/ICreatePaymentOutsideDTO';
 import ICreateWithdrawDTO from '../dtos/ICreateWithdrawDTO';
-import BankTransactions from '../infra/typeorm/entities/BankTransactions';
+import BankTransactions from '../infra/typeorm/schemas/BankTransactions';
 
 export default interface IBankTransactionsRepository {
   create(

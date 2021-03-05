@@ -5,7 +5,7 @@ import IRetrieveBankStatementDTO from '@modules/bankTransactions/dtos/IRetrieveB
 import IRetrieveBankStatementItemDTO from '@modules/bankTransactions/dtos/IRetrieveBankStatementItemDTO';
 import { BANK_TRANSACTIONS } from '@modules/bankTransactions/infra/typeorm/constants/BankTransactions.constants';
 import moment from 'moment';
-import BankTransactions from '../../infra/typeorm/entities/BankTransactions';
+import BankTransactions from '@modules/bankTransactions/infra/typeorm/schemas/BankTransactions';
 import GetObjsTransactionsService from './GetObjsTransactionsService';
 
 interface IRequest {

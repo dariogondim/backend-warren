@@ -5,10 +5,10 @@ import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
 import IBankRepository from '@modules/banks/repositories/IBankRepository';
 import IBankTransactionsRepository from '../repositories/IBankTransactionsRepository';
-import BankTransactions from '../infra/typeorm/entities/BankTransactions';
 
 import ValidateTransactionsService from './shared/ValidateTransactionsService';
 import GetObjsTransactionsService from './shared/GetObjsTransactionsService';
+import BankTransactions from '../infra/typeorm/schemas/BankTransactions';
 
 interface IRequest {
   originTransaction: string;

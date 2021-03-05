@@ -3,8 +3,8 @@ import { injectable } from 'tsyringe';
 import IBankAccountRepository from '@modules/bankAccounts/repositories/IBankAccountRepository';
 import { BANK_TRANSACTIONS } from '@modules/bankTransactions/infra/typeorm/constants/BankTransactions.constants';
 import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
-import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import moment from 'moment';
+import BankTransactions from '@modules/bankTransactions/infra/typeorm/schemas/BankTransactions';
 
 @injectable()
 class GetObjsTransactionsService {
