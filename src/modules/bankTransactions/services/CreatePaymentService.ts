@@ -7,6 +7,7 @@ import IBankTransactionsRepository from '../repositories/IBankTransactionsReposi
 import ValidateTransactionsService from './shared/ValidateTransactionsService';
 import GetObjsTransactionsService from './shared/GetObjsTransactionsService';
 import BankTransactions from '../infra/typeorm/schemas/BankTransactions';
+import ProfitabilityCopy from '../infra/typeorm/schemas/ProfitabilityCopy';
 
 interface IRequest {
   originTransaction: string;
@@ -118,7 +119,15 @@ class CreatePaymentService {
       throw new AppError('Insufficient funds');
     }
 
+    // salva a profitability para uso posterior
     const profitability_id = bankAccount?.profitability_id;
+    const profitability = Object.assign(
+      new ProfitabilityCopy(),
+      bankAccount?.profitability,
+    );
+
+    // salva o bankAccountRecipient para uso posterior
+    const bankAccountRecipient = bankAccount;
 
     const bankTransactionPaymentOrTransferInternal = this.bankTransactionsRepository.create(
       {
@@ -128,11 +137,13 @@ class CreatePaymentService {
         value,
         bank_account_sender_id,
         bank_account_recipient_id,
+        bankAccountRecipient,
         memo,
         status,
         typeTransaction,
         compensationDate,
         profitability_id,
+        profitability,
       },
     );
 

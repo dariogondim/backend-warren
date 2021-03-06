@@ -25,6 +25,7 @@
     "database": "warren_db_mongo",
     "useUnifiedTopology": true,
     "entities": [
+      "./src/modules/**/infra/typeorm/entities/*.ts",
       "./src/modules/**/infra/typeorm/schemas/*.ts"
     ]
   }

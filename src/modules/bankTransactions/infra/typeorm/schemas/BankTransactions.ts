@@ -1,17 +1,13 @@
-import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
-import Bank from '@modules/banks/infra/typeorm/entities/Bank';
-import Profitability from '@modules/profitabilities/infra/typeorm/entities/Profitability';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  JoinColumn,
-  ManyToOne,
   ObjectID,
   ObjectIdColumn,
 } from 'typeorm';
+import BankAccountCopy from './BankAccountCopy';
+import ProfitabilityCopy from './ProfitabilityCopy';
 
 @Entity('bank_transactions')
 class BankTransactions {
@@ -27,22 +23,22 @@ class BankTransactions {
   @Column()
   channel: string;
 
-  @Column({ name: 'type_transaction' })
+  @Column()
   typeTransaction: string;
 
-  @Column({ name: 'channel_description' })
+  @Column()
   channelDescription: string;
 
-  @Column({ name: 'compensation_date' })
+  @Column()
   compensationDate: Date;
 
-  @Column({ name: 'agency_destiny' })
+  @Column()
   agencyDestiny: string;
 
-  @Column({ name: 'cpf_destiny' })
+  @Column()
   cpfDestiny: string;
 
-  @Column({ name: 'account_destiny' })
+  @Column()
   accountDestiny: string;
 
   @Column()
@@ -69,13 +65,14 @@ class BankTransactions {
   @UpdateDateColumn()
   updated_at: Date;
 
-  bank: Bank;
+  // bank: Bank;
+  // bankAccountSender: BankAccount;
 
-  profitability: Profitability;
+  @Column(type => ProfitabilityCopy)
+  profitability: ProfitabilityCopy;
 
-  bankAccountRecipient: BankAccount;
-
-  bankAccountSender: BankAccount;
+  @Column(type => BankAccountCopy)
+  bankAccountRecipient: BankAccountCopy;
 }
 
 export default BankTransactions;

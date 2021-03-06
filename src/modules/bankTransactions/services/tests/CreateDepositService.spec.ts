@@ -23,8 +23,8 @@ import 'reflect-metadata';
 
 import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 import User from '@modules/users/infra/typeorm/entities/User';
-import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import AppError from '@shared/errors/AppError';
+import BankTransactions from '@modules/bankTransactions/infra/typeorm/schemas/BankTransactions';
 import CreateDepositService from '../CreateDepositService';
 
 let fakeUsersRepository: FakeUsersRepository;

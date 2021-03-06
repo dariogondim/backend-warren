@@ -1,3 +1,6 @@
+import BankAccount from '@modules/bankAccounts/infra/typeorm/entities/BankAccount';
+import ProfitabilityCopy from '../infra/typeorm/schemas/ProfitabilityCopy';
+
 export default interface ICreatePaymentDTO {
   originTransaction: string;
   channel: string;
@@ -9,5 +12,7 @@ export default interface ICreatePaymentDTO {
   status: string; // gerado no service
   compensationDate: Date; // gerado no service
   memo: string;
+  profitability: ProfitabilityCopy;
+  bankAccountRecipient: BankAccount;
   profitability_id?: string; // pode ser nulo se nao tiver rentabilidade
 }

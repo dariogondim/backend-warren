@@ -1,3 +1,5 @@
+import ProfitabilityCopy from '../infra/typeorm/schemas/ProfitabilityCopy';
+
 export default interface ICreateDepositDTO {
   originTransaction: string;
   channel: string;
@@ -8,5 +10,6 @@ export default interface ICreateDepositDTO {
   status: string; // gerado no service
   compensationDate: Date; // gerado no service
   memo: string;
+  profitability: ProfitabilityCopy;
   profitability_id?: string; // pode ser nulo se nao tiver rentabilidade
 }

@@ -3,11 +3,11 @@ import ICreateDepositDTO from '@modules/bankTransactions/dtos/ICreateDepositDTO'
 import ICreateWithdrawDTO from '@modules/bankTransactions/dtos/ICreateWithdrawDTO';
 import ICreatePaymentDTO from '@modules/bankTransactions/dtos/ICreatePaymentDTO';
 import ICreatePaymentOutsideDTO from '@modules/bankTransactions/dtos/ICreatePaymentOutsideDTO';
-import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import { uuid } from 'uuidv4';
 import Profitability from '@modules/profitabilities/infra/typeorm/entities/Profitability';
 import moment from 'moment';
 import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
+import BankTransactions from '@modules/bankTransactions/infra/typeorm/schemas/BankTransactions';
 
 function sortBankTransactionsByCompensationsDate(
   bankTransaction1: BankTransactions,

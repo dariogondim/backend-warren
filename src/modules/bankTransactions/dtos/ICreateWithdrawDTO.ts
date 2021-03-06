@@ -1,3 +1,5 @@
+import ProfitabilityCopy from '../infra/typeorm/schemas/ProfitabilityCopy';
+
 export default interface ICreateWithdrawDTO {
   originTransaction: string;
   channel: string;
@@ -7,4 +9,5 @@ export default interface ICreateWithdrawDTO {
   bank_account_sender_id: string; // de onde parte o saque
   memo: string;
   status: string; // gerado no service
+  profitability: ProfitabilityCopy;
 }

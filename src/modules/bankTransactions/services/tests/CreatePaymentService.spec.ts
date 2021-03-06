@@ -25,8 +25,8 @@ import ClientsHasUsers from '@modules/users_has_clients/infra/typeorm/entities/C
 
 import fakeDatabase from '@shared/providers/fakes/FakeDatabase';
 import User from '@modules/users/infra/typeorm/entities/User';
-import BankTransactions from '@modules/bankTransactions/infra/typeorm/entities/BankTransactions';
 import AppError from '@shared/errors/AppError';
+import BankTransactions from '@modules/bankTransactions/infra/typeorm/schemas/BankTransactions';
 import CreatePaymentService from '../CreatePaymentService';
 import CreateDepositService from '../CreateDepositService';
 

@@ -13,7 +13,7 @@ class BankAccountRepository implements IBankAccountRepository {
   public async findById(id: string): Promise<BankAccount | undefined> {
     const bankAccount = await this.ormRepository.findOne({
       where: { id },
-      relations: ['client', 'agency', 'agency.bank'],
+      relations: ['client', 'agency', 'agency.bank', 'profitability'],
     });
 
     return bankAccount;
