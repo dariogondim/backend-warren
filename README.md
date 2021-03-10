@@ -52,7 +52,7 @@ Qualquer coisa, se perdeu esse codigo, digite <b> docker ps -a</b>, ele deve ret
 <b>Usando a interface de comando ou seu gerenciador postgresql favorito, você deve criar um banco de dados chamdo <i>warren_db</i> em localhost,
 após a conexão com o container tiver sido executada com sucesso</b>
 
-Pela linha de comando, com o container iniciado, verifique se <b>docker ps</b retorn alguma coisa; se retornar, execute
+Pela linha de comando, com o container iniciado, execute <b>docker ps</b> e verifique se retornou alguma coisa; se retornar, execute
 <b> docker exec -it warren psql -U postgres </b>
 ele deve exibir no terminal algo parecido com <b>postgres=#</b>
 execute <b>create database warren_db;</b>, não se esqueça do ;
@@ -100,6 +100,26 @@ Time:        34.703 s
 
 Na pasta tmp do projeto, há um arquivo chamado Insomnia_2021-03-01-warren-backend. 
   Faça o download do programa: <b>https://insomnia.rest/download/</b> e importe esse arquivo. 
+  
+###Opcional
+  Criei uma branch chamada mongodb, onde as bankTransactions são salvas em um segundo banco de dados do tipo mongodb. Se
+  quiser testar essa opção, use <b> git checkout mongodb </b>
+  Recupere uma imagem mongodb do docker com 
+  <b> docker run --name mongodb -p 27017:27017 -d -t mongo </b>
+  Crie um database chamado <b> warren_db_mongo </b>
+  Você pode fazer o dowload em https://docs.mongodb.com/compass/master/install/, 
+  Abra o programa e clique em <b> New Connection </b>
+  na caixa em branco digite <b>mongodb://localhost:27017</b>
+  Apos a conexão, crie o database <b> warren_db_mongo </b> e não se esqueça de adicionar uma coleção vazia, teste por exemplo
+  Depois disso, basta executar o programa normalmente, não tem migrações
+  
+```
+yarn dev:server
+```
+  e os testes
+```
+yarn test
+``` 
 
 ## 📦 Desenvolvimento
 Há exemplos de como testar todos os endpoints
