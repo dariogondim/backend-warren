@@ -5,6 +5,8 @@ import CreateUserService from '@modules/users/services/CreateUserService';
 import CreateClientsHasUsersService from '@modules/users_has_clients/services/CreateClientsHasUsersService';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
+import { classToClass } from 'class-transformer';
+
 export default class SessionsController {
   @Transactional()
   public async create(request: Request, response: Response): Promise<Response> {
@@ -18,15 +20,6 @@ export default class SessionsController {
       password,
     });
 
-    // Com a atualização do TypeScript, isso se faz necessário
-    const userWithoutPassword = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
-
     const createClientHasUser = container.resolve(CreateClientsHasUsersService);
 
     await createClientHasUser.execute({
@@ -34,6 +27,6 @@ export default class SessionsController {
       client_id,
     });
 
-    return response.json(userWithoutPassword);
+    return response.json(classToClass(user));
   }
 }
