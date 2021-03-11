@@ -21,6 +21,17 @@
 ### 🔧 Instalação
 
 clonar este repositório, comando: <b> git clone https://github.com/dariogondim/backend-warren </b>
+
+## rápida
+  Tendo docker e docker compose instalados, simplesmente,execute:
+
+```
+docker-compose up --build
+```
+OBS: Só funciona com a branch master, por enquanto
+
+De forma detalhada...
+
 Se você não tem o git, faça o download em: https://git-scm.com/downloads
 
 Se você não tiver <b>yarn</b> instalado, baixe em: https://classic.yarnpkg.com/en/docs/install/#debian-stable
