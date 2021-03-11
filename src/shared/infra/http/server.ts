@@ -12,35 +12,56 @@ import 'express-async-errors';
 
 import uploadConfig from '@config/upload';
 import AppError from '@shared/errors/AppError';
+import { exec } from 'child_process';
 import routes from './routes';
 
 import '@shared/infra/typeorm';
 import '@shared/container';
 
-initializeTransactionalContext(); // Initialize cls-hooked
-patchTypeORMRepositoryWithBaseRepository(); // patch Repository with BaseRepository.
+exec('yarn typeorm migration:run', (error, stdout, stderr) => {
+  if (error) {
+    console.log(`error: ${error.message}`);
+    return;
+  }
+  if (stderr) {
+    console.log(`stderr: ${stderr}`);
+  }
+  console.log('as Migrações foram inseridas com sucesso!');
 
-const app = express();
+  initializeTransactionalContext(); // Initialize cls-hooked
+  patchTypeORMRepositoryWithBaseRepository(); // patch Repository with BaseRepository.
 
-app.use(cors());
-app.use(express.json());
-app.use('/files', express.static(uploadConfig.uploadsFolder));
-app.use(routes);
+  const app = express();
 
-app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
-  if (err instanceof AppError) {
-    return response
-      .status(err.statusCode)
-      .json({ status: 'error', message: err.message });
+  app.use(cors());
+  app.use(express.json());
+  app.use('/files', express.static(uploadConfig.uploadsFolder));
+  app.use(routes);
+
+  app.use(
+    (err: Error, request: Request, response: Response, _: NextFunction) => {
+      if (err instanceof AppError) {
+        return response
+          .status(err.statusCode)
+          .json({ status: 'error', message: err.message });
+      }
+
+      console.error(err);
+
+      return response
+        .status(500)
+        .json({ status: 'error', message: 'Internal server error' });
+    },
+  );
+
+  let port: number;
+  if (process.env.PORT) {
+    port = parseInt(process.env.PORT, 10);
+  } else {
+    port = 3333;
   }
 
-  console.error(err);
-
-  return response
-    .status(500)
-    .json({ status: 'error', message: 'Internal server error' });
-});
-
-app.listen(3333, () => {
-  console.log('🚀 Server started on port 3333');
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 Server started on port ${port}`);
+  });
 });
