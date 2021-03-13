@@ -4,6 +4,8 @@ WORKDIR /usr/app
 
 COPY package*.json ./
 
+RUN apk add --no-cache bash
+
 RUN yarn
 
 COPY . .
